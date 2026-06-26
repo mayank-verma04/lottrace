@@ -3,20 +3,27 @@ meta {
   type: http
   seq: 2
 }
+
 post {
   url: {{baseUrl}}/auth/login
   body: json
   auth: none
 }
+
 body:json {
   {
     "email": "admin@example.com",
     "password": "Password123!"
   }
 }
+
+vars:pre-request {
+  baseUrl: http://localhost:3000/api/v1
+}
+
 script:post-response {
   if (res.status === 200) {
-    bru.setEnvVar("accessToken", res.body.data.tokens.accessToken);
-    bru.setEnvVar("refreshToken", res.body.data.tokens.refreshToken);
+    bru.setEnvVar("accessToken", res.body.data.accessToken);
+    bru.setEnvVar("refreshToken", res.body.data.refreshToken);
   }
 }

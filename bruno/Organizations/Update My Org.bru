@@ -3,16 +3,19 @@ meta {
   type: http
   seq: 2
 }
+
 patch {
   url: {{baseUrl}}/organizations/me
   body: json
   auth: bearer
 }
+
 auth:bearer {
   token: {{accessToken}}
 }
+
 body:json {
   {
-    "name": "Updated Org Name"
+    "name": "Updated Test Org Name"
   }
 }

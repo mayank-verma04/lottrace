@@ -3,19 +3,27 @@ meta {
   type: http
   seq: 4
 }
+
 patch {
   url: {{baseUrl}}/users/:userId
   body: json
   auth: bearer
 }
+
+params:path {
+  userId: eaf80a3a-ef7a-48c7-8176-24549911af0e
+}
+
 auth:bearer {
   token: {{accessToken}}
 }
-vars:pre-request {
-  userId: user_id_here
-}
+
 body:json {
   {
     "firstName": "Updated"
   }
+}
+
+vars:pre-request {
+  userId: 
 }
