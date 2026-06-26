@@ -1,0 +1,13 @@
+meta {
+  name: Get My Org
+  type: http
+  seq: 1
+}
+get {
+  url: {{baseUrl}}/organizations/me
+  body: none
+  auth: bearer
+}
+auth:bearer {
+  token: {{accessToken}}
+}
