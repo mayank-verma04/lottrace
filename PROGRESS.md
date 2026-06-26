@@ -1,9 +1,9 @@
 # LotTrace — Build Progress
 
 ## Current Status
-**Phase:** Phase 0 — Foundation (Not Started)
-**Last Updated:** — (project not yet started)
-**Last Session:** Initial documentation setup complete
+**Phase:** Phase 0 — Foundation (In Progress)
+**Last Updated:** 2026-06-26
+**Last Session:** Step 4 — Org & User Management backend complete
 
 ---
 
@@ -39,7 +39,7 @@
 ---
 
 ## 🔄 In Progress
-_Nothing yet — ready to start Phase 0_
+_Step 5: Auth UI + User Management UI — next up_
 
 ---
 
@@ -77,11 +77,19 @@ _Nothing yet — ready to start Phase 0_
 - [x] Tenant scope middleware
 
 ### Step 4: Org & User Management (Backend)
-- [ ] GET/PATCH /api/v1/organizations/me
-- [ ] GET/POST/PATCH/DELETE /api/v1/users
-- [ ] POST /api/v1/users/invite
+- [x] GET/PATCH /api/v1/organizations/me
+- [x] GET /api/v1/users (paginated, filterable)
+- [x] GET /api/v1/users/:userId
+- [x] POST /api/v1/users/invite
+- [x] PATCH /api/v1/users/:userId
+- [x] POST /api/v1/users/:userId/deactivate
+- [x] POST /api/v1/users/:userId/reactivate
+- [x] Reusable pagination utility
+
+### Step 5: Auth UI + User Management UI (Frontend)
 - [ ] Auth UI (login, register, forgot-password pages)
 - [ ] User management UI
+- [ ] Organization settings page
 
 ---
 
@@ -105,7 +113,10 @@ _Nothing yet — ready to start Phase 0_
 ---
 
 ## 🔗 Key Files Modified Last Session
-_None yet_
+- `backend/src/modules/organizations/` — 4 files (validation, service, controller, routes)
+- `backend/src/modules/users/` — 4 files (validation, service, controller, routes)
+- `backend/src/utils/pagination.js` — reusable pagination helper
+- `backend/src/app.js` — registered org + user routes
 
 ---
 
