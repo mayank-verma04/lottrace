@@ -1,0 +1,6 @@
+packages:
+  - 'backend'
+  - 'frontend'
+  - 'scan-pwa'
+allowBuilds:
+  argon2: true

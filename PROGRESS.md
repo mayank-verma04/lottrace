@@ -45,15 +45,16 @@ _Nothing yet — ready to start Phase 0_
 
 ## 📋 Phase 0 — Next Up (in order)
 
-### Step 1: Project Scaffold
-- [ ] Init monorepo with pnpm workspaces
-- [ ] `backend/` — Express app scaffold (app.js, server.js, config/)
-- [ ] `frontend/` — Vite React app scaffold
-- [ ] `scan-pwa/` — Vite React PWA scaffold
-- [ ] Docker Compose (postgres, redis)
-- [ ] `.env.example` files for all services
-- [ ] ESLint + Prettier config (shared)
-- [ ] Husky pre-commit hooks
+### Phase 0: Project Foundation (Current)
+- [x] **Step 1: Monorepo Scaffold** (backend, frontend, scan-pwa, shared configs)
+- [x] Init monorepo with pnpm workspaces
+- [x] `backend/` — Express app scaffold (app.js, server.js, config/)
+- [x] `frontend/` — Vite React app scaffold
+- [x] `scan-pwa/` — Vite React PWA scaffold
+- [x] Docker Compose (postgres, redis)
+- [x] `.env.example` files for all services
+- [x] ESLint + Prettier config (shared)
+- [x] Husky pre-commit hooks
 
 ### Step 2: Database Foundation
 - [ ] Knex setup + knexfile.js

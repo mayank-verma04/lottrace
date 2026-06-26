@@ -1,0 +1,21 @@
+{
+  "name": "lottrace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FDA FSMA 204 supply chain traceability platform",
+  "scripts": {
+    "dev": "pnpm --filter backend dev & pnpm --filter frontend dev & pnpm --filter scan-pwa dev",
+    "dev:backend": "pnpm --filter backend dev",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "dev:pwa": "pnpm --filter scan-pwa dev",
+    "lint": "eslint . --ext .js,.jsx --ignore-path .gitignore",
+    "lint:fix": "eslint . --ext .js,.jsx --ignore-path .gitignore --fix",
+    "format": "prettier --write \"**/*.{js,jsx,json,md,css,yaml,yml}\"",
+    "format:check": "prettier --check \"**/*.{js,jsx,json,md,css,yaml,yml}\""
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@11.9.0"
+}
