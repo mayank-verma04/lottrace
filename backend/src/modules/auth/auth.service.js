@@ -1,0 +1,157 @@
+const crypto = require('crypto');
+const argon2 = require('argon2');
+const jwt = require('jsonwebtoken');
+const knex = require('../../db/knex');
+const env = require('../../config/env');
+const AppError = require('../../utils/AppError');
+const uuid = require('uuid');
+
+const generateTokens = (user, sessionFamily = uuid.v4()) => {
+  const accessToken = jwt.sign(
+    { sub: user.id, orgId: user.organization_id, role: user.role },
+    env.ACCESS_JWT_SECRET,
+    { expiresIn: '15m' }
+  );
+
+  const rawRefreshToken = crypto.randomBytes(32).toString('hex');
+  const refreshTokenHash = crypto.createHash('sha256').update(rawRefreshToken).digest('hex');
+
+  const decodedRefresh = jwt.sign(
+    { sub: user.id, family: sessionFamily },
+    env.REFRESH_JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+
+  return { accessToken, rawRefreshToken, refreshTokenHash, sessionFamily, decodedRefresh };
+};
+
+const register = async ({ firstName, lastName, email, password, organizationName }) => {
+  return knex.transaction(async (trx) => {
+    const existingUser = await trx('users').where({ email }).first();
+    if (existingUser) {
+      throw new AppError('Email already in use', 'EMAIL_IN_USE', 400);
+    }
+
+    const orgId = uuid.v4();
+    const orgSlug = organizationName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+    await trx('organizations').insert({
+      id: orgId,
+      name: organizationName,
+      slug: orgSlug + '-' + crypto.randomBytes(4).toString('hex'),
+      plan_tier: 'starter',
+      status: 'active',
+    });
+
+    const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
+    const userId = uuid.v4();
+
+    const [user] = await trx('users').insert({
+      id: userId,
+      organization_id: orgId,
+      first_name: firstName,
+      last_name: lastName,
+      email,
+      password_hash: passwordHash,
+      role: 'org_admin',
+      status: 'active',
+    }).returning('*');
+
+    const tokens = generateTokens(user);
+
+    await trx('refresh_tokens').insert({
+      user_id: user.id,
+      token_hash: tokens.refreshTokenHash,
+      session_family: tokens.sessionFamily,
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    });
+
+    return {
+      user: { id: user.id, email: user.email, role: user.role, organizationId: user.organization_id },
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.rawRefreshToken,
+    };
+  });
+};
+
+const login = async ({ email, password }) => {
+  const user = await knex('users').where({ email, status: 'active' }).first();
+  if (!user || !user.password_hash) {
+    throw new AppError('Invalid credentials', 'INVALID_CREDENTIALS', 401);
+  }
+
+  const valid = await argon2.verify(user.password_hash, password);
+  if (!valid) {
+    throw new AppError('Invalid credentials', 'INVALID_CREDENTIALS', 401);
+  }
+
+  await knex('users').where({ id: user.id }).update({ last_login_at: knex.fn.now() });
+
+  const tokens = generateTokens(user);
+
+  await knex('refresh_tokens').insert({
+    user_id: user.id,
+    token_hash: tokens.refreshTokenHash,
+    session_family: tokens.sessionFamily,
+    expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  });
+
+  return {
+    user: { id: user.id, email: user.email, role: user.role, organizationId: user.organization_id },
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.rawRefreshToken,
+  };
+};
+
+const refresh = async ({ refreshToken }) => {
+  const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+  const storedToken = await knex('refresh_tokens').where({ token_hash: tokenHash }).first();
+
+  if (!storedToken) {
+    throw new AppError('Invalid refresh token', 'INVALID_TOKEN', 401);
+  }
+
+  if (storedToken.is_used) {
+    await knex('refresh_tokens').where({ session_family: storedToken.session_family }).del();
+    throw new AppError('Token reuse detected. Please login again.', 'TOKEN_REUSE', 401);
+  }
+
+  if (new Date() > new Date(storedToken.expires_at)) {
+    throw new AppError('Refresh token expired', 'TOKEN_EXPIRED', 401);
+  }
+
+  const user = await knex('users').where({ id: storedToken.user_id, status: 'active' }).first();
+  if (!user) {
+    throw new AppError('User not found or inactive', 'USER_INVALID', 401);
+  }
+
+  return knex.transaction(async (trx) => {
+    await trx('refresh_tokens').where({ id: storedToken.id }).update({ is_used: true });
+
+    const tokens = generateTokens(user, storedToken.session_family);
+
+    await trx('refresh_tokens').insert({
+      user_id: user.id,
+      token_hash: tokens.refreshTokenHash,
+      session_family: tokens.sessionFamily,
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    });
+
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.rawRefreshToken,
+    };
+  });
+};
+
+const logout = async ({ refreshToken }) => {
+  const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+  await knex('refresh_tokens').where({ token_hash: tokenHash }).update({ is_used: true });
+};
+
+module.exports = {
+  register,
+  login,
+  refresh,
+  logout,
+};

@@ -57,24 +57,24 @@ _Nothing yet — ready to start Phase 0_
 - [x] Husky pre-commit hooks
 
 ### Step 2: Database Foundation
-- [ ] Knex setup + knexfile.js
-- [ ] Migration: organizations table
-- [ ] Migration: users table
-- [ ] Migration: roles/permissions
-- [ ] Migration: refresh_tokens table
-- [ ] Seed: default roles, super_admin user
-- [ ] PostgreSQL RLS policies
+- [x] Knex setup + knexfile.js
+- [x] Migration: organizations table
+- [x] Migration: users table
+- [x] Migration: roles/permissions
+- [x] Migration: refresh_tokens table
+- [x] Seed: default roles, super_admin user
+- [x] PostgreSQL RLS policies
 
 ### Step 3: Auth Module (Backend)
-- [ ] POST /api/v1/auth/register
-- [ ] POST /api/v1/auth/login
-- [ ] POST /api/v1/auth/refresh
-- [ ] POST /api/v1/auth/logout
-- [ ] POST /api/v1/auth/forgot-password
-- [ ] POST /api/v1/auth/reset-password
-- [ ] Auth middleware (JWT verify)
-- [ ] RBAC middleware (role check)
-- [ ] Tenant scope middleware
+- [x] POST /api/v1/auth/register
+- [x] POST /api/v1/auth/login
+- [x] POST /api/v1/auth/refresh
+- [x] POST /api/v1/auth/logout
+- [x] POST /api/v1/auth/forgot-password
+- [x] POST /api/v1/auth/reset-password
+- [x] Auth middleware (JWT verify)
+- [x] RBAC middleware (role check)
+- [x] Tenant scope middleware
 
 ### Step 4: Org & User Management (Backend)
 - [ ] GET/PATCH /api/v1/organizations/me

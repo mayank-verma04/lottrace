@@ -65,7 +65,7 @@ app.get('/health', (_req, res) => {
 
 // ─── API Routes ────────────────────────────────────────────
 // Module routes will be mounted here as they are built:
-// app.use('/api/v1/auth', require('./modules/auth/auth.routes'));
+app.use('/api/v1/auth', require('./modules/auth/auth.routes'));
 // app.use('/api/v1/organizations', require('./modules/organizations/organizations.routes'));
 // ... etc.
 
