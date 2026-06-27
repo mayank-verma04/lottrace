@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '@/lib/api';
+import { api } from '../lib/api';
 
 const LOTS_KEYS = {
   all: ['lots'],
@@ -32,7 +32,7 @@ export const useGetLot = (lotId) => {
 
 export const useCreateLot = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (lotData) => {
       const { data } = await api.post('/lots', lotData);
@@ -46,7 +46,7 @@ export const useCreateLot = () => {
 
 export const useUpdateLot = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ lotId, data }) => {
       const response = await api.patch(`/lots/${lotId}`, data);
@@ -61,7 +61,7 @@ export const useUpdateLot = () => {
 
 export const useVoidLot = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ lotId, voidReason }) => {
       const { data } = await api.post(`/lots/${lotId}/void`, { voidReason });
