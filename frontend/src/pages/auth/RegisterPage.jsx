@@ -11,7 +11,7 @@ import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const registerSchema = z.object({
-  orgName: z.string().min(1, 'Organization Name is required'),
+  organizationName: z.string().min(1, 'Organization Name is required'),
   firstName: z.string().min(1, 'First Name is required'),
   lastName: z.string().min(1, 'Last Name is required'),
   email: z.string().email('Invalid email address'),
@@ -20,7 +20,7 @@ const registerSchema = z.object({
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  
+
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(registerSchema)
   });
@@ -43,10 +43,10 @@ export default function RegisterPage() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <FormField label="Organization Name" error={errors.orgName?.message}>
-            <Input {...register('orgName')} placeholder="Company LLC" />
+          <FormField label="Organization Name" error={errors.organizationName?.message}>
+            <Input {...register('organizationName')} placeholder="Company LLC" />
           </FormField>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <FormField label="First Name" error={errors.firstName?.message}>
               <Input {...register('firstName')} placeholder="John" />
@@ -59,7 +59,7 @@ export default function RegisterPage() {
           <FormField label="Work Email" error={errors.email?.message}>
             <Input {...register('email')} type="email" placeholder="name@company.com" />
           </FormField>
-          
+
           <FormField label="Password" error={errors.password?.message}>
             <Input {...register('password')} type="password" />
           </FormField>
