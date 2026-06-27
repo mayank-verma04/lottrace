@@ -73,7 +73,7 @@ S3_ACCESS_KEY_ID=minioadmin
 S3_SECRET_ACCESS_KEY=minioadmin
 S3_BUCKET=lottrace-dev
 
-# Email (use Mailpit for dev)
+# Email (Resend for prod, Mailpit for dev)
 EMAIL_PROVIDER=smtp
 SMTP_HOST=localhost
 SMTP_PORT=1025

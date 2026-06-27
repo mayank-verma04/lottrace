@@ -58,6 +58,7 @@
 | Package | Version | Why |
 |---------|---------|-----|
 | `axios` | ^1.x | HTTP client for outbound requests (webhooks, internal) |
+| `resend` | ^3.x | Transactional email provider for invites and notifications |
 | `nodemailer` | ^6.x | Email sending (works with any SMTP/API) |
 
 ### Logging & Monitoring
