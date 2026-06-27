@@ -3,7 +3,7 @@
 ## Current Status
 **Phase:** Phase 1 — Trace Core / MVP (In Progress)
 **Last Updated:** 2026-06-27
-**Last Session:** Step 7 — Lots CRUD backend + frontend
+**Last Session:** Step 8 — Events CTEs + Hash Chain + Compliance Gaps
 
 ---
 
@@ -39,7 +39,7 @@
 ---
 
 ## 🔄 In Progress
-_Phase 1, Step 8 — Events CTEs (Creation, Receiving, Transformation, Shipping) coming next_
+_Phase 1, Step 9 — Trace engine (recursive CTE forward/backward) coming next_
 
 ---
 
@@ -115,6 +115,19 @@ _Phase 1, Step 8 — Events CTEs (Creation, Receiving, Transformation, Shipping)
 - [x] Lots frontend pages (list + detail)
 - [x] React Query hooks for lots
 - [x] Routes wired in App.jsx
+ 
+ ### Step 8: Events CTEs (Current)
+ - [x] Event: Creation CTE
+ - [x] Event: Receiving CTE
+ - [x] Event: Transformation CTE (N inputs → M outputs)
+ - [x] Event: Shipping CTE
+ - [x] Event amend flow (supersedes_event_id)
+ - [x] Event void flow
+ - [x] Compliance gap detection on event save
+ - [x] Hash chain: compute + store (record_hash, prev_hash)
+ - [x] Audit log middleware (auditLogger.js)
+ - [x] Record Event form (4 CTE types)
+ - [x] Events API routes & React Query hooks
 
 ---
 
@@ -152,6 +165,13 @@ _Phase 1, Step 8 — Events CTEs (Creation, Receiving, Transformation, Shipping)
 - `frontend/src/pages/products/` — ProductsListPage, ProductDetailPage
 - `frontend/src/pages/lots/` — LotsListPage, LotDetailPage
 - `frontend/src/App.jsx` — wired new routes
+- `backend/src/utils/hashChain.js` — [NEW] Hash chain logic for events
+- `backend/src/utils/auditTrail.js` — [NEW] Helper to write to audit_log
+- `backend/src/middleware/auditLogger.js` — [NEW] Audit log middleware
+- `backend/src/modules/events/` — [NEW] Events module (routes, controller, service, validation)
+- `backend/src/app.js` — Mounted events router
+- `frontend/src/api/events.api.js` — [NEW] Event React Query hooks
+- `frontend/src/pages/events/RecordEventPage.jsx` — [NEW] CTE event recording form
 
 ---
 

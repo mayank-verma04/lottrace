@@ -26,6 +26,7 @@ const ProductsListPage = lazy(() => import('./pages/products/ProductsListPage'))
 const ProductDetailPage = lazy(() => import('./pages/products/ProductDetailPage'));
 const LotsListPage = lazy(() => import('./pages/lots/LotsListPage'));
 const LotDetailPage = lazy(() => import('./pages/lots/LotDetailPage'));
+const RecordEventPage = lazy(() => import('./pages/events/RecordEventPage'));
 
 const PageLoader = () => (
   <div className="flex h-screen items-center justify-center">
@@ -64,7 +65,7 @@ function App() {
               {/* Placeholders for remaining routes */}
               <Route path="/lots" element={<LotsListPage />} />
               <Route path="/lots/:id" element={<LotDetailPage />} />
-              <Route path="/events/record" element={<div>Record Event Placeholder</div>} />
+              <Route path="/events/record" element={<RecordEventPage />} />
               <Route path="/trace" element={<div>Trace Placeholder</div>} />
               <Route path="/imports" element={<div>Imports Placeholder</div>} />
               <Route path="/reports" element={<div>Reports Placeholder</div>} />
