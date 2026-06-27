@@ -116,8 +116,8 @@ const LotDetailPage = () => {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <PageHeader
-          title={lot.traceability_lot_code}
-          subtitle={`Product: ${lot.product_name}`}
+          title={lot.traceabilityLotCode}
+          subtitle={`Product: ${lot.productName}`}
           action={
             <div className="flex items-center gap-3">
               {getStatusBadge(lot.status)}
@@ -161,8 +161,8 @@ const LotDetailPage = () => {
                   <dt className="text-muted-foreground">Product</dt>
                   <dd className="font-medium flex items-center gap-2">
                     <Package className="h-4 w-4 text-muted-foreground" />
-                    <Link to={`/products/${lot.product_id}`} className="text-primary hover:underline">
-                      {lot.product_name}
+                    <Link to={`/products/${lot.productId}`} className="text-primary hover:underline">
+                      {lot.productName}
                     </Link>
                   </dd>
                 </div>
@@ -172,18 +172,18 @@ const LotDetailPage = () => {
                 </div>
                 <div className="flex flex-col gap-1">
                   <dt className="text-muted-foreground">Traceability Lot Code (TLC)</dt>
-                  <dd className="font-mono text-xs bg-muted p-1 rounded w-fit">{lot.traceability_lot_code}</dd>
+                  <dd className="font-mono text-xs bg-muted p-1 rounded w-fit">{lot.traceabilityLotCode}</dd>
                 </div>
                 <div className="flex flex-col gap-1">
                   <dt className="text-muted-foreground">Created At</dt>
-                  <dd className="font-medium">{new Date(lot.created_at).toLocaleString()}</dd>
+                  <dd className="font-medium">{new Date(lot.createdAt).toLocaleString()}</dd>
                 </div>
-                {isVoid && lot.void_reason && (
+                {isVoid && lot.voidReason && (
                   <div className="flex flex-col gap-1 sm:col-span-2 mt-2 p-3 bg-destructive/10 rounded-md border border-destructive/20 text-destructive">
                     <dt className="font-semibold flex items-center gap-1">
                       <Ban className="h-3 w-3" /> Voided Reason
                     </dt>
-                    <dd>{lot.void_reason}</dd>
+                    <dd>{lot.voidReason}</dd>
                   </div>
                 )}
                 {lot.notes && (

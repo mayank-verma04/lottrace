@@ -57,3 +57,15 @@ export const useAmendEvent = () => {
     },
   });
 };
+
+export const useGetAttachmentUploadUrl = () => {
+  return useMutation({
+    mutationFn: ({ eventId, payload }) => api.post(`/events/${eventId}/attachments/presigned-url`, payload),
+  });
+};
+
+export const useAddAttachment = () => {
+  return useMutation({
+    mutationFn: ({ eventId, payload }) => api.post(`/events/${eventId}/attachments`, payload),
+  });
+};

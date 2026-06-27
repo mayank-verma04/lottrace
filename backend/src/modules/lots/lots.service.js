@@ -24,7 +24,19 @@ const createLot = async (data, organizationId, userId) => {
     })
     .returning('*');
 
-  return lot;
+  return {
+    id: lot.id,
+    organizationId: lot.organization_id,
+    productId: lot.product_id,
+    traceabilityLotCode: lot.traceability_lot_code,
+    quantity: lot.quantity,
+    uom: lot.uom,
+    notes: lot.notes,
+    status: lot.status,
+    createdAt: lot.created_at,
+    updatedAt: lot.updated_at,
+    version: lot.version
+  };
 };
 
 /**
@@ -47,9 +59,19 @@ const listLots = async (params, organizationId) => {
     .join('products', 'lots.product_id', 'products.id')
     .where('lots.organization_id', organizationId)
     .select(
-      'lots.*',
-      'products.name as product_name',
-      'products.sku as product_sku'
+      'lots.id',
+      'lots.organization_id as organizationId',
+      'lots.product_id as productId',
+      'lots.traceability_lot_code as traceabilityLotCode',
+      'lots.quantity',
+      'lots.uom',
+      'lots.notes',
+      'lots.status',
+      'lots.created_at as createdAt',
+      'lots.updated_at as updatedAt',
+      'lots.version',
+      'products.name as productName',
+      'products.sku as productSku'
     )
     .orderBy(sortColumnMap[sort] || 'lots.created_at', order || 'desc');
 
@@ -80,10 +102,21 @@ const getLot = async (lotId, organizationId) => {
     .join('products', 'lots.product_id', 'products.id')
     .where({ 'lots.id': lotId, 'lots.organization_id': organizationId })
     .select(
-      'lots.*',
-      'products.name as product_name',
-      'products.sku as product_sku',
-      'products.default_uom as product_default_uom'
+      'lots.id',
+      'lots.organization_id as organizationId',
+      'lots.product_id as productId',
+      'lots.traceability_lot_code as traceabilityLotCode',
+      'lots.quantity',
+      'lots.uom',
+      'lots.notes',
+      'lots.status',
+      'lots.void_reason as voidReason',
+      'lots.created_at as createdAt',
+      'lots.updated_at as updatedAt',
+      'lots.version',
+      'products.name as productName',
+      'products.sku as productSku',
+      'products.default_uom as productDefaultUom'
     )
     .first();
 
@@ -124,7 +157,19 @@ const updateLot = async (lotId, data, organizationId) => {
     .update(updateData)
     .returning('*');
 
-  return updated;
+  return {
+    id: updated.id,
+    organizationId: updated.organization_id,
+    productId: updated.product_id,
+    traceabilityLotCode: updated.traceability_lot_code,
+    quantity: updated.quantity,
+    uom: updated.uom,
+    notes: updated.notes,
+    status: updated.status,
+    createdAt: updated.created_at,
+    updatedAt: updated.updated_at,
+    version: updated.version
+  };
 };
 
 /**
@@ -149,7 +194,20 @@ const voidLot = async (lotId, voidReason, organizationId) => {
     })
     .returning('*');
 
-  return voided;
+  return {
+    id: voided.id,
+    organizationId: voided.organization_id,
+    productId: voided.product_id,
+    traceabilityLotCode: voided.traceability_lot_code,
+    quantity: voided.quantity,
+    uom: voided.uom,
+    notes: voided.notes,
+    status: voided.status,
+    voidReason: voided.void_reason,
+    createdAt: voided.created_at,
+    updatedAt: voided.updated_at,
+    version: voided.version
+  };
 };
 
 module.exports = {

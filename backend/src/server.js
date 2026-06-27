@@ -7,11 +7,13 @@ const logger = require('./utils/logger');
 const env = require('./config/env');
 
 const app = require('./app');
+const { startWorkers } = require('./jobs');
 
 const PORT = env.PORT;
 
 const server = app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT} in ${env.NODE_ENV} mode`);
+  startWorkers();
 });
 
 // ─── Graceful Shutdown ─────────────────────────────────────

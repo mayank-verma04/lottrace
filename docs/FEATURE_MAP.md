@@ -61,24 +61,24 @@
 | 1.16 | Hash chain: compute + store (record_hash, prev_hash) | audit | 🔲 |
 | 1.17 | Audit log middleware (auditLogger.js) | audit | 🔲 |
 | 1.18 | Audit log endpoint (GET /audit) | audit | 🔲 |
-| 1.19 | Trace engine: forward trace (recursive CTE) | trace | 🔲 |
-| 1.20 | Trace engine: backward trace (recursive CTE) | trace | 🔲 |
-| 1.21 | Trace engine: full trace (forward + backward) | trace | 🔲 |
-| 1.22 | Trace result caching (Redis, 5min TTL) | trace | 🔲 |
-| 1.23 | CSV compliance export (BullMQ job) | reports | 🔲 |
-| 1.24 | Compliance gap report (GET /reports/compliance-gaps) | reports | 🔲 |
-| 1.25 | BullMQ setup (queues.js, export-generator.js) | jobs | 🔲 |
-| 1.26 | S3/R2 storage client setup | infra | 🔲 |
-| 1.27 | File attachment upload (presigned URL flow) | events | 🔲 |
-| 1.28 | Locations list + detail pages | frontend | 🔲 |
-| 1.29 | Products list + detail pages | frontend | 🔲 |
+| 1.19 | Trace engine: forward trace (recursive CTE) | trace | ✅ |
+| 1.20 | Trace engine: backward trace (recursive CTE) | trace | ✅ |
+| 1.21 | Trace engine: full trace (forward + backward) | trace | ✅ |
+| 1.22 | Trace result caching (Redis, 5min TTL) | trace | ✅ |
+| 1.23 | CSV compliance export (BullMQ job) | reports | ✅ |
+| 1.24 | Compliance gap report (GET /reports/compliance-gaps) | reports | ✅ |
+| 1.25 | BullMQ setup (queues.js, export-generator.js) | jobs | ✅ |
+| 1.26 | S3/R2 storage client setup | infra | ✅ |
+| 1.27 | File attachment upload (presigned URL flow) | events | ✅ |
+| 1.28 | Locations list + detail pages | frontend | ✅ |
+| 1.29 | Products list + detail pages | frontend | ✅ |
 | 1.30 | Lots list page + DataTable | frontend | ✅ |
 | 1.31 | Lot detail page (timeline of events) | frontend | ✅ |
-| 1.32 | Record Event form (4 CTE types) | frontend | 🔲 |
-| 1.33 | Trace visualization page (tree + table) | frontend | 🔲 |
-| 1.34 | Audit log page | frontend | 🔲 |
-| 1.35 | Compliance gap list page | frontend | 🔲 |
-| 1.36 | CSV export button → download | frontend | 🔲 |
+| 1.32 | Record Event form (4 CTE types) | frontend | ✅ |
+| 1.33 | Trace visualization page (tree + table) | frontend | ✅ |
+| 1.34 | Audit log page | frontend | ✅ |
+| 1.35 | Compliance gap list page | frontend | ✅ |
+| 1.36 | CSV export button → download | frontend | ✅ |
 
 **End of Phase 1 = sellable MVP**
 

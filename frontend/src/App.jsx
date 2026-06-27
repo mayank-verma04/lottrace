@@ -26,7 +26,11 @@ const ProductsListPage = lazy(() => import('./pages/products/ProductsListPage'))
 const ProductDetailPage = lazy(() => import('./pages/products/ProductDetailPage'));
 const LotsListPage = lazy(() => import('./pages/lots/LotsListPage'));
 const LotDetailPage = lazy(() => import('./pages/lots/LotDetailPage'));
+const EventsListPage = lazy(() => import('./pages/events/EventsListPage'));
 const RecordEventPage = lazy(() => import('./pages/events/RecordEventPage'));
+const TracePage = lazy(() => import('./pages/trace/TracePage'));
+const AuditLogPage = lazy(() => import('./pages/audit/AuditLogPage'));
+const ComplianceGapsPage = lazy(() => import('./pages/reports/ComplianceGapsPage'));
 
 const PageLoader = () => (
   <div className="flex h-screen items-center justify-center">
@@ -65,12 +69,13 @@ function App() {
               {/* Placeholders for remaining routes */}
               <Route path="/lots" element={<LotsListPage />} />
               <Route path="/lots/:id" element={<LotDetailPage />} />
+              <Route path="/events" element={<EventsListPage />} />
               <Route path="/events/record" element={<RecordEventPage />} />
-              <Route path="/trace" element={<div>Trace Placeholder</div>} />
+              <Route path="/trace" element={<TracePage />} />
               <Route path="/imports" element={<div>Imports Placeholder</div>} />
-              <Route path="/reports" element={<div>Reports Placeholder</div>} />
+              <Route path="/reports/compliance-gaps" element={<ComplianceGapsPage />} />
               <Route path="/recall" element={<div>Recall Placeholder</div>} />
-              <Route path="/audit" element={<div>Audit Placeholder</div>} />
+              <Route path="/audit" element={<AuditLogPage />} />
             </Route>
             
             <Route path="*" element={<div>404 Not Found</div>} />

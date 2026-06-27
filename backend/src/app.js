@@ -72,6 +72,9 @@ app.use('/api/v1/locations', require('./modules/locations/locations.routes'));
 app.use('/api/v1/products', require('./modules/products/products.routes'));
 app.use('/api/v1/lots', require('./modules/lots/lots.routes'));
 app.use('/api/v1/events', require('./modules/events/events.routes'));
+app.use('/api/v1/trace', require('./modules/trace/trace.routes'));
+app.use('/api/v1/audit', require('./modules/audit/audit.routes'));
+app.use('/api/v1/reports', require('./modules/reports/reports.routes'));
 
 // ─── 404 Catch-All ─────────────────────────────────────────
 app.use((_req, res) => {

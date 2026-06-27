@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Trash2, ClipboardList } from 'lucide-react';
 
-import { useCreateEvent } from '@/api/events.api';
+import { useCreateEvent, useGetAttachmentUploadUrl, useAddAttachment } from '@/api/events.api';
 import { useGetLocations } from '@/api/locations.api';
 import { useGetLots } from '@/api/lots.api';
 
@@ -70,6 +70,17 @@ export default function RecordEventPage() {
   const removeInput = removeRow(setInputs);
   const removeOutput = removeRow(setOutputs);
 
+  const { mutateAsync: getUploadUrl } = useGetAttachmentUploadUrl();
+  const { mutateAsync: addAttachment } = useAddAttachment();
+
+  const [files, setFiles] = useState([]);
+
+  const handleFileChange = (e) => {
+    if (e.target.files.length > 0) {
+      setFiles(Array.from(e.target.files));
+    }
+  };
+
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -81,7 +92,28 @@ export default function RecordEventPage() {
         inputs: inputs.filter((i) => i.lotId),
         outputs: outputs.filter((o) => o.lotId),
       };
-      await createEvent(payload);
+      
+      const res = await createEvent(payload);
+      const eventId = res.data.data.id;
+
+      if (files.length > 0) {
+        for (const file of files) {
+          const urlRes = await getUploadUrl({ eventId, payload: { filename: file.name, contentType: file.type } });
+          const { uploadUrl, key } = urlRes.data.data;
+          
+          await fetch(uploadUrl, {
+            method: 'PUT',
+            body: file,
+            headers: { 'Content-Type': file.type },
+          });
+
+          await addAttachment({
+            eventId,
+            payload: { key, filename: file.name, contentType: file.type, sizeBytes: file.size }
+          });
+        }
+      }
+
       toast.success('Event recorded successfully');
       navigate('/events');
     } catch (err) {
@@ -89,7 +121,7 @@ export default function RecordEventPage() {
     }
   };
 
-  // API returns snake_case keys — use traceability_lot_code, product_name
+  // API returns camelCase keys
   const lots = lotsData?.data ?? [];
   const locations = locationsData?.data ?? [];
 
@@ -120,8 +152,8 @@ export default function RecordEventPage() {
                 <SelectContent>
                   {lots.map((lot) => (
                     <SelectItem key={lot.id} value={String(lot.id)}>
-                      {lot.traceability_lot_code}
-                      {lot.product_name ? ` — ${lot.product_name}` : ''}
+                      {lot.traceabilityLotCode}
+                      {lot.productName ? ` — ${lot.productName}` : ''}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -271,6 +303,26 @@ export default function RecordEventPage() {
               placeholder="Optional notes or context for this event"
               rows={3}
             />
+          </CardContent>
+        </Card>
+
+        {/* Attachments */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold">Attachments</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Input
+              type="file"
+              multiple
+              onChange={handleFileChange}
+              className="file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+            />
+            {files.length > 0 && (
+              <p className="mt-2 text-sm text-muted-foreground">
+                {files.length} file(s) selected
+              </p>
+            )}
           </CardContent>
         </Card>
 

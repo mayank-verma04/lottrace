@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 const { computeEventHash } = require('../../utils/hashChain');
 const AppError = require('../../utils/AppError');
 const crc32 = require('crc-32');
+const { invalidateTraceCache } = require('../trace/trace.service');
 
 const getAdvisoryLockId = (orgId) => Math.abs(crc32.str(orgId));
 
@@ -120,6 +121,12 @@ const createEvent = async (data, organizationId, userId, overrideStatus = 'activ
       await trx('event_lot_links').insert(links);
     }
 
+    // Invalidate trace cache for all affected lots
+    const affectedLotIds = [...new Set(links.map(l => l.lot_id))];
+    await Promise.all(
+      affectedLotIds.map(lid => invalidateTraceCache(organizationId, lid))
+    );
+
     return event;
   });
 };
@@ -213,10 +220,44 @@ const amendEvent = async (eventId, data, organizationId, userId) => {
   });
 };
 
+const generateAttachmentUploadUrl = async (eventId, organizationId, filename, contentType) => {
+  // We can inject storage require here or at the top. Let's do it here to avoid circular dep if any, though it's clean at top.
+  const { generatePresignedUploadUrl } = require('../../lib/storage');
+  
+  // Verify event belongs to org
+  const event = await db('events').where({ id: eventId, organization_id: organizationId }).first();
+  if (!event) throw new AppError('Event not found', 404);
+
+  const key = `attachments/org_${organizationId}/events/${eventId}/${Date.now()}_${filename.replace(/\s+/g, '_')}`;
+  
+  const uploadUrl = await generatePresignedUploadUrl(key, contentType);
+  return { uploadUrl, key };
+};
+
+const addAttachment = async (eventId, data, organizationId, userId) => {
+  const event = await db('events').where({ id: eventId, organization_id: organizationId }).first();
+  if (!event) throw new AppError('Event not found', 404);
+
+  const [attachment] = await db('attachments').insert({
+    organization_id: organizationId,
+    parent_type: 'event',
+    parent_id: eventId,
+    storage_key: data.key,
+    filename: data.filename,
+    content_type: data.contentType,
+    size_bytes: data.sizeBytes,
+    uploaded_by: userId,
+  }).returning('*');
+
+  return attachment;
+};
+
 module.exports = {
   createEvent,
   getEvents,
   getEventById,
   voidEvent,
   amendEvent,
+  generateAttachmentUploadUrl,
+  addAttachment,
 };

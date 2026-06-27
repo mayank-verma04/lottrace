@@ -47,4 +47,16 @@ router.post(
   eventsController.amendEvent
 );
 
+router.post(
+  '/:eventId/attachments/presigned-url',
+  rbac(['org_admin', 'compliance_manager', 'operator']),
+  eventsController.generateAttachmentUploadUrl
+);
+
+router.post(
+  '/:eventId/attachments',
+  rbac(['org_admin', 'compliance_manager', 'operator']),
+  eventsController.addAttachment
+);
+
 module.exports = router;

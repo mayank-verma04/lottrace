@@ -4,3 +4,4 @@ packages:
   - 'scan-pwa'
 allowBuilds:
   argon2: true
+  msgpackr-extract: set this to true or false

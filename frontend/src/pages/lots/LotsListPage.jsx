@@ -80,7 +80,7 @@ const LotsListPage = () => {
 
   const columns = [
     {
-      accessorKey: 'traceability_lot_code',
+      accessorKey: 'traceabilityLotCode',
       header: 'Lot Code',
       cell: ({ row }) => (
         <Link 
@@ -88,18 +88,18 @@ const LotsListPage = () => {
           className="font-medium text-primary hover:underline flex items-center gap-2"
         >
           <Layers className="h-4 w-4 text-muted-foreground" />
-          {row.original.traceability_lot_code}
+          {row.original.traceabilityLotCode}
         </Link>
       ),
     },
     {
-      accessorKey: 'product_name',
+      accessorKey: 'productName',
       header: 'Product',
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="text-sm font-medium">{row.original.product_name}</span>
-          {row.original.product_sku && (
-            <span className="text-xs text-muted-foreground">SKU: {row.original.product_sku}</span>
+          <span className="text-sm font-medium">{row.original.productName}</span>
+          {row.original.productSku && (
+            <span className="text-xs text-muted-foreground">SKU: {row.original.productSku}</span>
           )}
         </div>
       ),
@@ -119,11 +119,11 @@ const LotsListPage = () => {
       cell: ({ row }) => getStatusBadge(row.original.status),
     },
     {
-      accessorKey: 'created_at',
+      accessorKey: 'createdAt',
       header: 'Created',
       cell: ({ row }) => (
         <span className="text-sm text-muted-foreground">
-          {new Date(row.original.created_at).toLocaleDateString()}
+          {new Date(row.original.createdAt).toLocaleDateString()}
         </span>
       ),
     },

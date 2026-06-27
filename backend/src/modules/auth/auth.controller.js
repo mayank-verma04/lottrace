@@ -17,18 +17,18 @@ const refresh = async (req, res) => {
 };
 
 const logout = async (req, res) => {
-  await authService.logout(req.validatedBody);
+  const accessToken = req.headers.authorization?.split(' ')[1];
+  await authService.logout({ ...req.validatedBody, accessToken });
   return apiResponse.success(res, null, 'Logged out successfully');
 };
 
 const forgotPassword = async (req, res) => {
-  // TODO: implement real email sending
-  console.log('Forgot password requested for:', req.validatedBody.email);
+  await authService.forgotPassword(req.validatedBody);
   return apiResponse.success(res, null, 'If that email exists, a reset link has been sent');
 };
 
 const resetPassword = async (req, res) => {
-  // TODO: implement actual password reset
+  await authService.resetPassword(req.validatedBody);
   return apiResponse.success(res, null, 'Password reset successfully');
 };
 

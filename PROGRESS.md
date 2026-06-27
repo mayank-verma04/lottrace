@@ -3,7 +3,7 @@
 ## Current Status
 **Phase:** Phase 1 — Trace Core / MVP (In Progress)
 **Last Updated:** 2026-06-27
-**Last Session:** Step 8 — Events CTEs + Hash Chain + Compliance Gaps
+**Last Session:** Step 9 — Trace Engine (Forward/Backward/Full + Redis Cache + UI)
 
 ---
 
@@ -39,7 +39,7 @@
 ---
 
 ## 🔄 In Progress
-_Phase 1, Step 9 — Trace engine (recursive CTE forward/backward) coming next_
+_Phase 2, Step 11 — Offline Scanning PWA init coming next_
 
 ---
 
@@ -116,7 +116,7 @@ _Phase 1, Step 9 — Trace engine (recursive CTE forward/backward) coming next_
 - [x] React Query hooks for lots
 - [x] Routes wired in App.jsx
  
- ### Step 8: Events CTEs (Current)
+### Step 8: Events CTEs (Current)
  - [x] Event: Creation CTE
  - [x] Event: Receiving CTE
  - [x] Event: Transformation CTE (N inputs → M outputs)
@@ -129,12 +129,39 @@ _Phase 1, Step 9 — Trace engine (recursive CTE forward/backward) coming next_
  - [x] Record Event form (4 CTE types)
  - [x] Events API routes & React Query hooks
 
+### Step 9: Trace Engine
+ - [x] Trace engine: forward trace (recursive CTE)
+ - [x] Trace engine: backward trace (recursive CTE)
+ - [x] Trace engine: full trace (forward + backward, deduplicated)
+ - [x] Trace result caching (Redis, 5min TTL)
+ - [x] Cache invalidation on event creation
+ - [x] Trace API routes (GET /trace/:lotId/forward|backward|full)
+ - [x] Trace React Query hooks
+ - [x] Trace visualization page (table view + tree view)
+ - [x] Routes wired in App.jsx
+
+### Step 10: Events List & Audit Log (Phase 1 Complete)
+ - [x] Audit backend module (routes, controller, service, validation)
+ - [x] GET /api/v1/audit endpoint with pagination and filtering
+ - [x] Audit API React Query hooks
+ - [x] AuditLogPage (DataTable with filters)
+ - [x] EventsListPage (DataTable)
+ - [x] Mount routes in App.jsx and backend app.js
+
+### Step 10.5: Phase 1 Final Polish
+ - [x] Reports backend (GET compliance gaps, POST export csv)
+ - [x] Jobs queue (BullMQ) & worker (export-generator)
+ - [x] Storage util for AWS S3
+ - [x] Attachment support in Events module
+ - [x] ComplianceGapsPage UI
+ - [x] CSV Export Button on Events and Audit logs
+ - [x] Attachment upload on RecordEventPage
+
 ---
 
 ## 🚫 Blocked / Open Questions
 - Pricing model not finalized (per-location vs per-event-volume vs flat tiers)
 - Offline scanning scope (Phase 2 vs Phase 3 decision pending)
-- Email provider chosen: Resend
 
 ---
 
@@ -151,27 +178,14 @@ _Phase 1, Step 9 — Trace engine (recursive CTE forward/backward) coming next_
 ---
 
 ## 🔗 Key Files Modified Last Session
-- `backend/src/db/migrations/` — 7 new migration files (locations through audit_log)
-- `backend/src/db/migrations/20240101000018_add_rls_policies.js` — expanded to all tenant tables
-- `backend/src/modules/locations/` — 4 files (routes, controller, service, validation)
-- `backend/src/modules/products/` — 4 files (routes, controller, service, validation)
-- `backend/src/middleware/validate.js` — upgraded to support body+query+params
-- `backend/src/app.js` — mounted locations + products routes
-- `frontend/src/api/locations.api.js` — React Query hooks
-- `frontend/src/api/products.api.js` — React Query hooks
-- `frontend/src/api/lots.api.js` — React Query hooks
-- `backend/src/modules/lots/` — 4 files (routes, controller, service, validation)
-- `frontend/src/pages/locations/` — LocationsListPage, LocationDetailPage
-- `frontend/src/pages/products/` — ProductsListPage, ProductDetailPage
-- `frontend/src/pages/lots/` — LotsListPage, LotDetailPage
-- `frontend/src/App.jsx` — wired new routes
-- `backend/src/utils/hashChain.js` — [NEW] Hash chain logic for events
-- `backend/src/utils/auditTrail.js` — [NEW] Helper to write to audit_log
-- `backend/src/middleware/auditLogger.js` — [NEW] Audit log middleware
-- `backend/src/modules/events/` — [NEW] Events module (routes, controller, service, validation)
-- `backend/src/app.js` — Mounted events router
-- `frontend/src/api/events.api.js` — [NEW] Event React Query hooks
-- `frontend/src/pages/events/RecordEventPage.jsx` — [NEW] CTE event recording form
+- `backend/src/modules/trace/` — [NEW] Trace module (routes, controller, service, validation)
+- `backend/src/modules/events/events.service.js` — Added trace cache invalidation
+- `backend/src/app.js` — Mounted trace router at /api/v1/trace
+- `frontend/src/api/trace.api.js` — [NEW] Trace React Query hooks
+- `frontend/src/pages/trace/TracePage.jsx` — [NEW] Trace visualization page
+- `frontend/src/App.jsx` — Wired TracePage route
+- `PROGRESS.md` — Updated to Step 9
+- `docs/FEATURE_MAP.md` — Marked 1.19–1.22, 1.33 complete
 
 ---
 

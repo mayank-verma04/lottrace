@@ -5,6 +5,8 @@ const knex = require('../../db/knex');
 const env = require('../../config/env');
 const AppError = require('../../utils/AppError');
 const uuid = require('uuid');
+const redis = require('../../config/redis');
+const emailService = require('../../utils/email');
 
 const generateTokens = (user, sessionFamily = uuid.v4()) => {
   const accessToken = jwt.sign(
@@ -144,9 +146,74 @@ const refresh = async ({ refreshToken }) => {
   });
 };
 
-const logout = async ({ refreshToken }) => {
+const logout = async ({ refreshToken, accessToken }) => {
   const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
   await knex('refresh_tokens').where({ token_hash: tokenHash }).update({ is_used: true });
+
+  if (accessToken) {
+    try {
+      const decoded = jwt.decode(accessToken);
+      if (decoded && decoded.exp) {
+        const expiresIn = decoded.exp - Math.floor(Date.now() / 1000);
+        if (expiresIn > 0) {
+          await redis.set(`bl_${accessToken}`, 'revoked', 'EX', expiresIn);
+        }
+      }
+    } catch (err) {
+      // Ignore JWT decode errors on logout
+    }
+  }
+};
+
+const forgotPassword = async ({ email }) => {
+  const user = await knex('users').where({ email, status: 'active' }).first();
+  if (!user) {
+    // Silently succeed to prevent email enumeration
+    return;
+  }
+
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+  const resetExpiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+  await knex('users')
+    .where({ id: user.id })
+    .update({
+      password_reset_token_hash: resetTokenHash,
+      password_reset_expires_at: resetExpiresAt,
+      updated_at: knex.fn.now()
+    });
+
+  await emailService.sendPasswordResetEmail(user.email, resetToken);
+};
+
+const resetPassword = async ({ token, newPassword }) => {
+  const resetTokenHash = crypto.createHash('sha256').update(token).digest('hex');
+  
+  const user = await knex('users')
+    .where({ password_reset_token_hash: resetTokenHash, status: 'active' })
+    .first();
+
+  if (!user || !user.password_reset_expires_at || new Date() > new Date(user.password_reset_expires_at)) {
+    throw new AppError('Invalid or expired password reset token', 'INVALID_TOKEN', 400);
+  }
+
+  const passwordHash = await argon2.hash(newPassword, { type: argon2.argon2id });
+
+  return knex.transaction(async (trx) => {
+    await trx('users')
+      .where({ id: user.id })
+      .update({
+        password_hash: passwordHash,
+        password_reset_token_hash: null,
+        password_reset_expires_at: null,
+        updated_at: trx.fn.now()
+      });
+
+    await trx('refresh_tokens')
+      .where({ user_id: user.id })
+      .update({ is_used: true });
+  });
 };
 
 module.exports = {
@@ -154,4 +221,6 @@ module.exports = {
   login,
   refresh,
   logout,
+  forgotPassword,
+  resetPassword,
 };

@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const db = require('../../db/knex');
 const AppError = require('../../utils/AppError');
 const { paginate } = require('../../utils/pagination');
+const emailService = require('../../utils/email');
 
 // Sort field mapping: camelCase API → snake_case DB
 const SORT_MAP = {
@@ -103,11 +104,10 @@ const inviteUser = async (organizationId, data, invitedBy) => {
     })
     .returning('*');
 
-  // TODO: Send invite email with inviteToken when email provider is configured
-  // For now, log invite token in development
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[DEV] Invite token for ${data.email}: ${inviteToken}`);
-  }
+  const org = await db('organizations').where({ id: organizationId }).select('name').first();
+  const organizationName = org ? org.name : 'LotTrace';
+
+  await emailService.sendInviteEmail(data.email, inviteToken, organizationName);
 
   return formatUser(user);
 };
