@@ -2,8 +2,8 @@
 
 ## Current Status
 **Phase:** Phase 0 — Foundation (In Progress)
-**Last Updated:** 2026-06-26
-**Last Session:** Step 4 — Org & User Management backend complete
+**Last Updated:** 2026-06-27
+**Last Session:** Step 5 — Auth UI & User Management frontend complete
 
 ---
 
@@ -39,7 +39,7 @@
 ---
 
 ## 🔄 In Progress
-_Step 5: Auth UI + User Management UI — next up_
+_Phase 0, Step 6 — coming next_
 
 ---
 
@@ -87,9 +87,9 @@ _Step 5: Auth UI + User Management UI — next up_
 - [x] Reusable pagination utility
 
 ### Step 5: Auth UI + User Management UI (Frontend)
-- [ ] Auth UI (login, register, forgot-password pages)
-- [ ] User management UI
-- [ ] Organization settings page
+- [x] Auth UI (login, register, forgot-password pages)
+- [x] User management UI
+- [x] Organization settings page
 
 ---
 
@@ -113,10 +113,10 @@ _Step 5: Auth UI + User Management UI — next up_
 ---
 
 ## 🔗 Key Files Modified Last Session
-- `backend/src/modules/organizations/` — 4 files (validation, service, controller, routes)
-- `backend/src/modules/users/` — 4 files (validation, service, controller, routes)
-- `backend/src/utils/pagination.js` — reusable pagination helper
-- `backend/src/app.js` — registered org + user routes
+- `frontend/src/App.jsx` — React Router setup + TanStack query provider
+- `frontend/src/pages/auth/` — Login, Register, Password pages
+- `frontend/src/pages/settings/` — Organization and Users pages
+- `frontend/src/components/layout/` — AppLayout, AuthLayout, Sidebar
 
 ---
 
