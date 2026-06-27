@@ -49,8 +49,8 @@
 | 1.4 | External partner location support | locations | 🔲 |
 | 1.5 | Product CRUD API | products | 🔲 |
 | 1.6 | Product custom KDE schema builder (API) | products | 🔲 |
-| 1.7 | Lot CRUD API | lots | 🔲 |
-| 1.8 | Lot void (POST /lots/:id/void) | lots | 🔲 |
+| 1.7 | Lot CRUD API | lots | ✅ |
+| 1.8 | Lot void (POST /lots/:id/void) | lots | ✅ |
 | 1.9 | Event: Creation CTE | events | 🔲 |
 | 1.10 | Event: Receiving CTE | events | 🔲 |
 | 1.11 | Event: Transformation CTE (N inputs → M outputs) | events | 🔲 |
@@ -72,8 +72,8 @@
 | 1.27 | File attachment upload (presigned URL flow) | events | 🔲 |
 | 1.28 | Locations list + detail pages | frontend | 🔲 |
 | 1.29 | Products list + detail pages | frontend | 🔲 |
-| 1.30 | Lots list page + DataTable | frontend | 🔲 |
-| 1.31 | Lot detail page (timeline of events) | frontend | 🔲 |
+| 1.30 | Lots list page + DataTable | frontend | ✅ |
+| 1.31 | Lot detail page (timeline of events) | frontend | ✅ |
 | 1.32 | Record Event form (4 CTE types) | frontend | 🔲 |
 | 1.33 | Trace visualization page (tree + table) | frontend | 🔲 |
 | 1.34 | Audit log page | frontend | 🔲 |

@@ -70,6 +70,7 @@ app.use('/api/v1/organizations', require('./modules/organizations/organizations.
 app.use('/api/v1/users', require('./modules/users/users.routes'));
 app.use('/api/v1/locations', require('./modules/locations/locations.routes'));
 app.use('/api/v1/products', require('./modules/products/products.routes'));
+app.use('/api/v1/lots', require('./modules/lots/lots.routes'));
 
 // ─── 404 Catch-All ─────────────────────────────────────────
 app.use((_req, res) => {

@@ -3,7 +3,7 @@
 ## Current Status
 **Phase:** Phase 1 — Trace Core / MVP (In Progress)
 **Last Updated:** 2026-06-27
-**Last Session:** Step 6 — DB Migrations (core trace tables) + Locations/Products backend + frontend
+**Last Session:** Step 7 — Lots CRUD backend + frontend
 
 ---
 
@@ -39,7 +39,7 @@
 ---
 
 ## 🔄 In Progress
-_Phase 1, Step 7 — Lots CRUD backend + frontend coming next_
+_Phase 1, Step 8 — Events CTEs (Creation, Receiving, Transformation, Shipping) coming next_
 
 ---
 
@@ -109,6 +109,13 @@ _Phase 1, Step 7 — Lots CRUD backend + frontend coming next_
 - [x] React Query hooks for locations + products
 - [x] Routes wired in App.jsx
 
+### Step 7: Lots CRUD (Phase 1 Continued)
+- [x] Lot CRUD API (list, create, get, update)
+- [x] Lot void (POST /lots/:id/void)
+- [x] Lots frontend pages (list + detail)
+- [x] React Query hooks for lots
+- [x] Routes wired in App.jsx
+
 ---
 
 ## 🚫 Blocked / Open Questions
@@ -139,8 +146,11 @@ _Phase 1, Step 7 — Lots CRUD backend + frontend coming next_
 - `backend/src/app.js` — mounted locations + products routes
 - `frontend/src/api/locations.api.js` — React Query hooks
 - `frontend/src/api/products.api.js` — React Query hooks
+- `frontend/src/api/lots.api.js` — React Query hooks
+- `backend/src/modules/lots/` — 4 files (routes, controller, service, validation)
 - `frontend/src/pages/locations/` — LocationsListPage, LocationDetailPage
 - `frontend/src/pages/products/` — ProductsListPage, ProductDetailPage
+- `frontend/src/pages/lots/` — LotsListPage, LotDetailPage
 - `frontend/src/App.jsx` — wired new routes
 
 ---
