@@ -1,17 +1,17 @@
 # LotTrace — Build Progress
 
 ## Current Status
-**Phase:** Phase 0 — Foundation (In Progress)
+**Phase:** Phase 1 — Trace Core / MVP (In Progress)
 **Last Updated:** 2026-06-27
-**Last Session:** Step 5 — Auth UI & User Management frontend complete
+**Last Session:** Step 6 — DB Migrations (core trace tables) + Locations/Products backend + frontend
 
 ---
 
 ## Phase Overview
 | Phase | Name | Weeks | Status |
 |-------|------|-------|--------|
-| 0 | Foundation | 1–3 | 🔲 Not Started |
-| 1 | Trace Core (MVP) | 4–9 | 🔲 Not Started |
+| 0 | Foundation | 1–3 | ✅ Complete |
+| 1 | Trace Core (MVP) | 4–9 | 🔄 In Progress |
 | 2 | Field-Ready | 10–14 | 🔲 Not Started |
 | 3 | Scale & Integrate | 15–20 | 🔲 Not Started |
 | 4 | Depth | 21+ | 🔲 Not Started |
@@ -39,7 +39,7 @@
 ---
 
 ## 🔄 In Progress
-_Phase 0, Step 6 — coming next_
+_Phase 1, Step 7 — Lots CRUD backend + frontend coming next_
 
 ---
 
@@ -91,6 +91,24 @@ _Phase 0, Step 6 — coming next_
 - [x] User management UI
 - [x] Organization settings page
 
+### Step 6: Core Trace DB + Locations/Products (Phase 1 Start)
+- [x] Migration: locations table
+- [x] Migration: products table
+- [x] Migration: lots table
+- [x] Migration: events table (append-only, hash chain, generated column)
+- [x] Migration: event_lot_links table
+- [x] Migration: attachments table
+- [x] Migration: audit_log table
+- [x] RLS policies on all 7 new tables
+- [x] Locations CRUD API (list, create, get, update, deactivate)
+- [x] Products CRUD API (list, create, get, update)
+- [x] KDE schema validation (nested Zod for custom_kde_schema)
+- [x] Validate middleware upgraded (body + query + params)
+- [x] Locations frontend pages (list + detail + create dialog)
+- [x] Products frontend pages (list + detail + KDE schema builder)
+- [x] React Query hooks for locations + products
+- [x] Routes wired in App.jsx
+
 ---
 
 ## 🚫 Blocked / Open Questions
@@ -113,10 +131,17 @@ _Phase 0, Step 6 — coming next_
 ---
 
 ## 🔗 Key Files Modified Last Session
-- `frontend/src/App.jsx` — React Router setup + TanStack query provider
-- `frontend/src/pages/auth/` — Login, Register, Password pages
-- `frontend/src/pages/settings/` — Organization and Users pages
-- `frontend/src/components/layout/` — AppLayout, AuthLayout, Sidebar
+- `backend/src/db/migrations/` — 7 new migration files (locations through audit_log)
+- `backend/src/db/migrations/20240101000018_add_rls_policies.js` — expanded to all tenant tables
+- `backend/src/modules/locations/` — 4 files (routes, controller, service, validation)
+- `backend/src/modules/products/` — 4 files (routes, controller, service, validation)
+- `backend/src/middleware/validate.js` — upgraded to support body+query+params
+- `backend/src/app.js` — mounted locations + products routes
+- `frontend/src/api/locations.api.js` — React Query hooks
+- `frontend/src/api/products.api.js` — React Query hooks
+- `frontend/src/pages/locations/` — LocationsListPage, LocationDetailPage
+- `frontend/src/pages/products/` — ProductsListPage, ProductDetailPage
+- `frontend/src/App.jsx` — wired new routes
 
 ---
 

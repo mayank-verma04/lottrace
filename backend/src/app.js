@@ -68,6 +68,8 @@ app.get('/health', (_req, res) => {
 app.use('/api/v1/auth', require('./modules/auth/auth.routes'));
 app.use('/api/v1/organizations', require('./modules/organizations/organizations.routes'));
 app.use('/api/v1/users', require('./modules/users/users.routes'));
+app.use('/api/v1/locations', require('./modules/locations/locations.routes'));
+app.use('/api/v1/products', require('./modules/products/products.routes'));
 
 // ─── 404 Catch-All ─────────────────────────────────────────
 app.use((_req, res) => {

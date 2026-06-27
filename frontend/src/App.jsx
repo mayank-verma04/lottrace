@@ -19,6 +19,12 @@ const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const OrganizationPage = lazy(() => import('./pages/settings/OrganizationPage'));
 const UsersPage = lazy(() => import('./pages/settings/UsersPage'));
 
+// Locations & Products
+const LocationsListPage = lazy(() => import('./pages/locations/LocationsListPage'));
+const LocationDetailPage = lazy(() => import('./pages/locations/LocationDetailPage'));
+const ProductsListPage = lazy(() => import('./pages/products/ProductsListPage'));
+const ProductDetailPage = lazy(() => import('./pages/products/ProductDetailPage'));
+
 const PageLoader = () => (
   <div className="flex h-screen items-center justify-center">
     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
@@ -47,12 +53,16 @@ function App() {
               <Route path="/settings" element={<OrganizationPage />} />
               <Route path="/settings/users" element={<UsersPage />} />
               
-              {/* Placeholders for other routes mentioned in Sidebar */}
+              {/* Locations & Products */}
+              <Route path="/locations" element={<LocationsListPage />} />
+              <Route path="/locations/:locationId" element={<LocationDetailPage />} />
+              <Route path="/products" element={<ProductsListPage />} />
+              <Route path="/products/:productId" element={<ProductDetailPage />} />
+
+              {/* Placeholders for remaining routes */}
               <Route path="/lots" element={<div>Lots Placeholder</div>} />
               <Route path="/events/record" element={<div>Record Event Placeholder</div>} />
               <Route path="/trace" element={<div>Trace Placeholder</div>} />
-              <Route path="/locations" element={<div>Locations Placeholder</div>} />
-              <Route path="/products" element={<div>Products Placeholder</div>} />
               <Route path="/imports" element={<div>Imports Placeholder</div>} />
               <Route path="/reports" element={<div>Reports Placeholder</div>} />
               <Route path="/recall" element={<div>Recall Placeholder</div>} />
