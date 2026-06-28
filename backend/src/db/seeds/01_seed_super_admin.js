@@ -7,8 +7,7 @@ const argon2 = require('argon2');
  */
 exports.seed = async function(knex) {
   // Deletes ALL existing entries
-  await knex('users').del();
-  await knex('organizations').del();
+  await knex.raw('TRUNCATE TABLE organizations, users CASCADE');
 
   const orgId = uuid.v4();
   const userId = uuid.v4();
