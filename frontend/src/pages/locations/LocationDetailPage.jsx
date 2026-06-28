@@ -20,6 +20,8 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Switch } from '@/components/ui/switch';
+import { Controller } from 'react-hook-form';
 
 const LOCATION_TYPES = ['farm', 'plant', 'warehouse', 'distributor', 'retailer', 'other'];
 const TYPE_LABELS = { farm: 'Farm', plant: 'Plant', warehouse: 'Warehouse', distributor: 'Distributor', retailer: 'Retailer', other: 'Other' };
@@ -34,6 +36,7 @@ const updateSchema = z.object({
   country: z.string().optional().default('US'),
   gln: z.string().optional().default(''),
   timezone: z.string().optional().default(''),
+  isExternal: z.boolean().default(false),
 });
 
 const LocationDetailPage = () => {
@@ -48,7 +51,7 @@ const LocationDetailPage = () => {
 
   const location = data?.data;
 
-  const { register, handleSubmit, reset, formState: { errors }, setValue } = useForm({
+  const { register, handleSubmit, reset, formState: { errors }, setValue, control } = useForm({
     resolver: zodResolver(updateSchema),
   });
 
@@ -64,6 +67,7 @@ const LocationDetailPage = () => {
       country: location.country || 'US',
       gln: location.gln || '',
       timezone: location.timezone || '',
+      isExternal: location.is_external || false,
     });
     setEditing(true);
   };
@@ -219,6 +223,24 @@ const LocationDetailPage = () => {
                   <Label htmlFor="timezone">Timezone</Label>
                   <Input id="timezone" {...register('timezone')} />
                 </div>
+              </div>
+              <div className="flex flex-row items-center justify-between rounded-lg border p-3 mt-2 shadow-sm">
+                <div className="space-y-0.5">
+                  <Label>External Location</Label>
+                  <p className="text-sm text-muted-foreground">
+                    This location is managed by a third-party partner.
+                  </p>
+                </div>
+                <Controller
+                  name="isExternal"
+                  control={control}
+                  render={({ field }) => (
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  )}
+                />
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <Button type="button" variant="outline" onClick={() => setEditing(false)}>Cancel</Button>

@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { Layers, ArrowLeft, MoreVertical, Edit2, Ban, History, Package } from 'lucide-react';
 
 import { useGetLot, useUpdateLot, useVoidLot } from '@/api/lots.api';
+import { useGetEvents } from '@/api/events.api';
 import { usePermissions } from '@/hooks/usePermissions';
 
 import { PageHeader } from '@/components/common/PageHeader';
@@ -20,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
+import { formatEventDate } from '@/utils/formatDate';
 
 const updateSchema = z.object({
   quantity: z.coerce.number().positive('Must be positive').optional(),
@@ -48,7 +50,8 @@ const LotDetailPage = () => {
   const navigate = useNavigate();
   const { can } = usePermissions();
 
-  const { data: lot, isLoading, isError } = useGetLot(id);
+  const { data: lot, isLoading: isLotLoading, isError: isLotError } = useGetLot(id);
+  const { data: eventsData, isLoading: isEventsLoading } = useGetEvents({ lotId: id, limit: 100 });
   const updateMutation = useUpdateLot();
   const voidMutation = useVoidLot();
 
@@ -81,7 +84,7 @@ const LotDetailPage = () => {
     });
   };
 
-  if (isLoading) {
+  if (isLotLoading) {
     return (
       <div className="flex flex-col gap-6">
         <div className="flex items-center gap-4">
@@ -96,7 +99,7 @@ const LotDetailPage = () => {
     );
   }
 
-  if (isError || !lot) {
+  if (isLotError || !lot) {
     return (
       <EmptyState
         icon={Layers}
@@ -196,19 +199,50 @@ const LotDetailPage = () => {
             </CardContent>
           </Card>
 
-          {/* Timeline Placeholder */}
+          {/* Event Timeline */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-row items-center justify-between pb-4">
               <CardTitle className="text-lg flex items-center gap-2">
                 <History className="h-5 w-5 text-muted-foreground" />
                 Event Timeline
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="py-8 text-center text-muted-foreground border-2 border-dashed rounded-md">
-                <p>Events (Receiving, Transformation, Shipping) will appear here.</p>
-                <p className="text-sm mt-1">Pending Implementation.</p>
-              </div>
+              {isEventsLoading ? (
+                <div className="flex flex-col gap-4">
+                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                </div>
+              ) : eventsData?.data?.length > 0 ? (
+                <div className="relative border-l-2 border-muted ml-3 space-y-6">
+                  {eventsData.data.map((event, index) => (
+                    <div key={event.id} className="relative pl-6">
+                      <div className={`absolute -left-[9px] top-1.5 h-4 w-4 rounded-full border-2 border-background ${event.status === 'void' ? 'bg-destructive' : 'bg-primary'}`} />
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                        <div>
+                          <Link to={`/events/${event.id}`} className="font-semibold text-primary hover:underline capitalize">
+                            {event.event_type} Event
+                          </Link>
+                          {event.status === 'void' && (
+                            <Badge variant="destructive" className="ml-2 text-[10px] h-4">VOID</Badge>
+                          )}
+                          <p className="text-sm text-muted-foreground mt-0.5">
+                            at {event.location_name}
+                          </p>
+                        </div>
+                        <div className="text-sm text-muted-foreground sm:text-right">
+                          <p>{formatEventDate(event.event_datetime)}</p>
+                          <p className="text-xs">by {event.recorded_by_name}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-8 text-center text-muted-foreground border-2 border-dashed rounded-md">
+                  <p>No events recorded for this lot.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

@@ -1,9 +1,9 @@
 # LotTrace — Build Progress
 
 ## Current Status
-**Phase:** Phase 1 — Trace Core / MVP (In Progress)
-**Last Updated:** 2026-06-27
-**Last Session:** Step 9 — Trace Engine (Forward/Backward/Full + Redis Cache + UI)
+**Phase:** Phase 1 — Trace Core / MVP (Complete)
+**Last Updated:** 2026-06-28
+**Last Session:** Phase 1 Final Polish (UI wiring & fixes)
 
 ---
 
@@ -11,7 +11,7 @@
 | Phase | Name | Weeks | Status |
 |-------|------|-------|--------|
 | 0 | Foundation | 1–3 | ✅ Complete |
-| 1 | Trace Core (MVP) | 4–9 | 🔄 In Progress |
+| 1 | Trace Core (MVP) | 4–9 | ✅ Complete |
 | 2 | Field-Ready | 10–14 | 🔲 Not Started |
 | 3 | Scale & Integrate | 15–20 | 🔲 Not Started |
 | 4 | Depth | 21+ | 🔲 Not Started |

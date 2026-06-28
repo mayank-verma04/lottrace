@@ -132,10 +132,18 @@ const createEvent = async (data, organizationId, userId, overrideStatus = 'activ
 };
 
 const getEvents = async (query, organizationId) => {
-  const { page, limit, eventType, status, locationId, dateFrom, dateTo } = query;
+  const { page, limit, eventType, status, locationId, lotId, dateFrom, dateTo } = query;
   const offset = (page - 1) * limit;
 
   let queryBuilder = db('events').where({ 'events.organization_id': organizationId });
+
+  if (lotId) {
+    queryBuilder = queryBuilder.whereExists(
+      db('event_lot_links')
+        .whereRaw('event_lot_links.event_id = events.id')
+        .andWhere('event_lot_links.lot_id', lotId)
+    );
+  }
 
   if (eventType) queryBuilder = queryBuilder.where({ event_type: eventType });
   if (status) queryBuilder = queryBuilder.where({ status });
@@ -143,7 +151,7 @@ const getEvents = async (query, organizationId) => {
   if (dateFrom) queryBuilder = queryBuilder.where('event_datetime', '>=', dateFrom);
   if (dateTo) queryBuilder = queryBuilder.where('event_datetime', '<=', dateTo);
 
-  const [countResult] = await queryBuilder.clone().count('id as count');
+  const [countResult] = await queryBuilder.clone().count('events.id as count');
   const total = parseInt(countResult.count, 10);
 
   const events = await queryBuilder

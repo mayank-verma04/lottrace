@@ -10,6 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Link, useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useRequestExport } from '@/api/reports.api';
 import { toast } from 'sonner';
@@ -53,8 +56,11 @@ const EventsListPage = () => {
       header: 'Type',
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
-          {getEventTypeBadge(row.original.event_type)}
+          <Link to={`/events/${row.original.id}`} className="hover:opacity-80">
+            {getEventTypeBadge(row.original.event_type)}
+          </Link>
           {row.original.status === 'void' && <Badge variant="destructive" className="scale-75">VOID</Badge>}
+          {row.original.status === 'amended' && <Badge variant="secondary" className="scale-75 bg-yellow-100 text-yellow-800">AMENDED</Badge>}
         </div>
       ),
     },
@@ -87,6 +93,27 @@ const EventsListPage = () => {
           </span>
         </div>
       ),
+    },
+    {
+      id: 'actions',
+      header: '',
+      cell: ({ row }) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm">⋯</Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link to={`/events/${row.original.id}`}>View Details</Link>
+            </DropdownMenuItem>
+            {can('events.create') && row.original.status === 'active' && (
+              <DropdownMenuItem onClick={() => navigate(`/events/record?amendEventId=${row.original.id}`)}>
+                Amend Event
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
     }
   ];
 

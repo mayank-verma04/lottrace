@@ -48,6 +48,7 @@ const getEventsQuerySchema = z.object({
   eventType: z.enum(['creation', 'receiving', 'transformation', 'shipping']).optional(),
   status: z.enum(['active', 'amended', 'void']).optional(),
   locationId: z.string().uuid().optional(),
+  lotId: z.string().uuid().optional(),
   dateFrom: z.string().datetime().optional(),
   dateTo: z.string().datetime().optional(),
 });

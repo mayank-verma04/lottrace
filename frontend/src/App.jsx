@@ -28,6 +28,7 @@ const LotsListPage = lazy(() => import('./pages/lots/LotsListPage'));
 const LotDetailPage = lazy(() => import('./pages/lots/LotDetailPage'));
 const EventsListPage = lazy(() => import('./pages/events/EventsListPage'));
 const RecordEventPage = lazy(() => import('./pages/events/RecordEventPage'));
+const EventDetailPage = lazy(() => import('./pages/events/EventDetailPage'));
 const TracePage = lazy(() => import('./pages/trace/TracePage'));
 const AuditLogPage = lazy(() => import('./pages/audit/AuditLogPage'));
 const ComplianceGapsPage = lazy(() => import('./pages/reports/ComplianceGapsPage'));
@@ -71,6 +72,7 @@ function App() {
               <Route path="/lots/:id" element={<LotDetailPage />} />
               <Route path="/events" element={<EventsListPage />} />
               <Route path="/events/record" element={<RecordEventPage />} />
+              <Route path="/events/:id" element={<EventDetailPage />} />
               <Route path="/trace" element={<TracePage />} />
               <Route path="/imports" element={<div>Imports Placeholder</div>} />
               <Route path="/reports/compliance-gaps" element={<ComplianceGapsPage />} />
