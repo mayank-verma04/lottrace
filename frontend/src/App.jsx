@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
@@ -7,6 +7,8 @@ import { queryClient } from './lib/queryClient';
 import { AppLayout } from './components/layout/AppLayout';
 import { AuthLayout } from './components/layout/AuthLayout';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
+import { useAuthStore } from './stores/auth.store';
+import axios from 'axios';
 
 // Auth Pages
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
@@ -40,6 +42,25 @@ const PageLoader = () => (
 );
 
 function App() {
+  const { setAuth, clearAuth } = useAuthStore();
+
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const { data } = await axios.post(
+          import.meta.env.VITE_API_BASE_URL + '/api/v1/auth/refresh',
+          {},
+          { withCredentials: true }
+        );
+        const { user, accessToken } = data.data;
+        setAuth(user, accessToken);
+      } catch (error) {
+        clearAuth();
+      }
+    };
+    initAuth();
+  }, [setAuth, clearAuth]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Toaster position="top-right" richColors />

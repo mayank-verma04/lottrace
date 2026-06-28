@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const cors = require('cors');
 const compression = require('compression');
 const pinoHttp = require('pino-http');
+const cookieParser = require('cookie-parser');
 
 const logger = require('./utils/logger');
 const apiResponse = require('./utils/apiResponse');
@@ -57,6 +58,7 @@ app.use(
 // 6. Body parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
 
 // ─── Health Check ──────────────────────────────────────────
 app.get('/health', (_req, res) => {

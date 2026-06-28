@@ -140,6 +140,7 @@ const refresh = async ({ refreshToken }) => {
     });
 
     return {
+      user: { id: user.id, email: user.email, role: user.role, organizationId: user.organization_id },
       accessToken: tokens.accessToken,
       refreshToken: tokens.rawRefreshToken,
     };

@@ -13,9 +13,7 @@ const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
-const refreshSchema = z.object({
-  refreshToken: z.string().min(1, 'Refresh token is required'),
-});
+const refreshSchema = z.object({});
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Invalid email address').toLowerCase(),

@@ -178,14 +178,13 @@ _Phase 2, Step 11 — Offline Scanning PWA init coming next_
 ---
 
 ## 🔗 Key Files Modified Last Session
-- `backend/src/modules/trace/` — [NEW] Trace module (routes, controller, service, validation)
-- `backend/src/modules/events/events.service.js` — Added trace cache invalidation
-- `backend/src/app.js` — Mounted trace router at /api/v1/trace
-- `frontend/src/api/trace.api.js` — [NEW] Trace React Query hooks
-- `frontend/src/pages/trace/TracePage.jsx` — [NEW] Trace visualization page
-- `frontend/src/App.jsx` — Wired TracePage route
-- `PROGRESS.md` — Updated to Step 9
-- `docs/FEATURE_MAP.md` — Marked 1.19–1.22, 1.33 complete
+- `backend/src/app.js` — Added cookie-parser middleware
+- `backend/src/modules/auth/auth.controller.js` — Set HttpOnly cookie for refresh token
+- `backend/src/modules/auth/auth.service.js` — Return user on refresh
+- `frontend/src/App.jsx` — Added auth initialization on mount
+- `frontend/src/stores/auth.store.js` — Added `isLoading` state
+- `frontend/src/components/layout/ProtectedRoute.jsx` — Support `isLoading`
+- `frontend/src/components/layout/Sidebar.jsx` — Added Logout button
 
 ---
 

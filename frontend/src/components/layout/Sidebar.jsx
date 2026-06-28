@@ -1,10 +1,13 @@
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Package, PlusCircle, GitBranch,
-  MapPin, Box, Upload, FileText, AlertTriangle, Shield, Settings
+  MapPin, Box, Upload, FileText, AlertTriangle, Shield, Settings, LogOut
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePermissions } from '@/hooks/usePermissions';
+import { api } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth.store';
+import { useNavigate } from 'react-router-dom';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, permission: '*' },
@@ -22,7 +25,20 @@ const NAV_ITEMS = [
 
 export const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { can } = usePermissions();
+  const { clearAuth } = useAuthStore();
+
+  const handleLogout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch (e) {
+      // ignore error
+    } finally {
+      clearAuth();
+      navigate('/login');
+    }
+  };
 
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col h-full">
@@ -51,6 +67,15 @@ export const Sidebar = () => {
           );
         })}
       </nav>
+      <div className="p-4 border-t border-gray-200">
+        <button
+          onClick={handleLogout}
+          className="flex w-full items-center px-3 py-2 text-sm font-medium rounded-md text-red-600 hover:bg-red-50 transition-colors"
+        >
+          <LogOut className="h-5 w-5 mr-3" />
+          Logout
+        </button>
+      </div>
     </div>
   );
 };
