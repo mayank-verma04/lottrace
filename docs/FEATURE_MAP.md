@@ -100,10 +100,10 @@
 | 2.10 | Import background job (import-processor.js) | jobs | ✅ |
 | 2.11 | Import deduplication logic | imports | ✅ |
 | 2.12 | CSV import templates (downloadable per CTE) | imports | ✅ |
-| 2.13 | Recall simulation API (POST /recall/simulations) | recall | 🔲 |
-| 2.14 | Recall simulation storage + retrieval | recall | 🔲 |
-| 2.15 | Dashboard stats endpoint (GET /dashboard/stats) | dashboard | 🔲 |
-| 2.16 | Dashboard recent activity feed | dashboard | 🔲 |
+| 2.13 | Recall simulation API (POST /recall/simulations) | recall | ✅ |
+| 2.14 | Recall simulation storage + retrieval | recall | ✅ |
+| 2.15 | Dashboard stats endpoint (GET /dashboard/stats) | dashboard | ✅ |
+| 2.16 | Dashboard recent activity feed | dashboard | ✅ |
 | 2.17 | Compliance gap email notification | jobs | 🔲 |
 | 2.18 | Email batch digest (not per-gap storm) | jobs | 🔲 |
 | 2.19 | Hash chain verifier background job (nightly) | jobs | 🔲 |

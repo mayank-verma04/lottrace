@@ -78,6 +78,8 @@ app.use('/api/v1/trace', require('./modules/trace/trace.routes'));
 app.use('/api/v1/audit', require('./modules/audit/audit.routes'));
 app.use('/api/v1/reports', require('./modules/reports/reports.routes'));
 app.use('/api/v1/imports', require('./modules/imports/routes'));
+app.use('/api/v1/recall', require('./modules/recall/routes'));
+app.use('/api/v1/dashboard', require('./modules/dashboard/routes'));
 
 // ─── 404 Catch-All ─────────────────────────────────────────
 app.use((_req, res) => {

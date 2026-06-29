@@ -23,7 +23,7 @@
 ---
 
 ## 🔄 In Progress
-_Phase 2, Step 13 — Recall simulation API & Dashboard stats coming next_
+_Phase 2, Step 14 — Recall Simulation UI, Dashboard stats UI coming next_
 
 ---
 
@@ -155,6 +155,12 @@ _Phase 2, Step 13 — Recall simulation API & Dashboard stats coming next_
  - [x] Import background job (import-processor.js)
  - [x] ImportPage UI
 
+### Step 13: Recall API & Dashboard Stats
+ - [x] Recall simulation API (POST /recall/simulations)
+ - [x] Recall simulation storage + retrieval
+ - [x] Dashboard stats endpoint (GET /dashboard/stats)
+ - [x] Dashboard recent activity feed (GET /dashboard/activity)
+
 ---
 
 ## 🚫 Blocked / Open Questions
@@ -176,10 +182,9 @@ _Phase 2, Step 13 — Recall simulation API & Dashboard stats coming next_
 ---
 
 ## 🔗 Key Files Modified Last Session
-- `scan-pwa/src/pages/ScanPage.jsx` — Added bulk scan and unknown lot mode
-- `scan-pwa/src/utils/gs1Parser.js` — Supported variable length and FNC1
-- `backend/src/modules/imports/*` — Added bulk import API
-- `frontend/src/pages/ImportPage.jsx` — Added CSV upload page
+- `backend/src/modules/recall/*` — Added recall simulation API
+- `backend/src/modules/dashboard/*` — Added dashboard stats and activity feed API
+- `backend/src/app.js` — Mounted recall and dashboard routes
 
 ---
 
