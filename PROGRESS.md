@@ -20,22 +20,6 @@
 
 ## ✅ Completed
 
-### Documentation (Pre-Build)
-- [x] PRD reviewed and finalized
-- [x] AGENTS.md (master AI context)
-- [x] PROGRESS.md (this file)
-- [x] docs/ARCHITECTURE.md
-- [x] docs/TECH_STACK.md
-- [x] docs/API_STANDARDS.md
-- [x] docs/DATABASE_SCHEMA.md
-- [x] docs/CONVENTIONS.md
-- [x] docs/UI_DESIGN_SYSTEM.md
-- [x] docs/FEATURE_MAP.md
-- [x] docs/VALIDATION_RULES.md
-- [x] backend/AGENTS.md
-- [x] frontend/AGENTS.md
-- [x] scan-pwa/AGENTS.md
-
 ---
 
 ## 🔄 In Progress
