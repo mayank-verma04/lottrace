@@ -23,7 +23,7 @@
 ---
 
 ## 🔄 In Progress
-_Phase 2, Step 11 — Offline Scanning PWA init coming next_
+_Phase 2, Step 12 — Scan PWA features & Bulk import API coming next_
 
 ---
 
@@ -140,6 +140,12 @@ _Phase 2, Step 11 — Offline Scanning PWA init coming next_
  - [x] ComplianceGapsPage UI
  - [x] CSV Export Button on Events and Audit logs
  - [x] Attachment upload on RecordEventPage
+
+### Step 11: Phase 2 Foundation & PWA Init
+ - [x] DB migrations: imports, recall_simulations, notifications, idempotency_keys
+ - [x] Scan PWA: camera scanning (@zxing/library)
+ - [x] Scan PWA: scan → lookup lot → attach to event flow scaffold
+ - [x] PWA manifest + service worker (vite-plugin-pwa)
 
 ---
 

@@ -88,13 +88,13 @@
 
 | # | Feature | Module | Status |
 |---|---------|--------|--------|
-| 2.1 | DB migrations: imports, recall_simulations, notifications, idempotency_keys | database | 🔲 |
-| 2.2 | Scan PWA: camera scanning (@zxing/library) | scan-pwa | 🔲 |
-| 2.3 | Scan PWA: scan → lookup lot → attach to event | scan-pwa | 🔲 |
+| 2.1 | DB migrations: imports, recall_simulations, notifications, idempotency_keys | database | ✅ |
+| 2.2 | Scan PWA: camera scanning (@zxing/library) | scan-pwa | ✅ |
+| 2.3 | Scan PWA: scan → lookup lot → attach to event | scan-pwa | ✅ |
 | 2.4 | Scan PWA: bulk scan mode (sequential receiving) | scan-pwa | 🔲 |
 | 2.5 | Scan PWA: GS1-128 parsing | scan-pwa | 🔲 |
 | 2.6 | Scan PWA: create new lot from unknown scan | scan-pwa | 🔲 |
-| 2.7 | PWA manifest + service worker (vite-plugin-pwa) | scan-pwa | 🔲 |
+| 2.7 | PWA manifest + service worker (vite-plugin-pwa) | scan-pwa | ✅ |
 | 2.8 | Bulk CSV import API (POST /imports) | imports | 🔲 |
 | 2.9 | Import validation + per-row error report | imports | 🔲 |
 | 2.10 | Import background job (import-processor.js) | jobs | 🔲 |
