@@ -10,8 +10,9 @@ const app = require('./app');
 const { startWorkers } = require('./jobs');
 
 const PORT = env.PORT;
+const HOST = '0.0.0.0'
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, HOST, () => {
   logger.info(`Server running on port ${PORT} in ${env.NODE_ENV} mode`);
   startWorkers();
 });
