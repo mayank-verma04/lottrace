@@ -23,7 +23,7 @@
 ---
 
 ## 🔄 In Progress
-_Phase 2, Step 12 — Scan PWA features & Bulk import API coming next_
+_Phase 2, Step 13 — Recall simulation API & Dashboard stats coming next_
 
 ---
 
@@ -147,6 +147,14 @@ _Phase 2, Step 12 — Scan PWA features & Bulk import API coming next_
  - [x] Scan PWA: scan → lookup lot → attach to event flow scaffold
  - [x] PWA manifest + service worker (vite-plugin-pwa)
 
+### Step 12: Scan PWA Features & Bulk Import API
+ - [x] Scan PWA: bulk scan mode (sequential receiving)
+ - [x] Scan PWA: GS1-128 parsing
+ - [x] Scan PWA: create new lot from unknown scan
+ - [x] Bulk CSV import API (POST /imports)
+ - [x] Import background job (import-processor.js)
+ - [x] ImportPage UI
+
 ---
 
 ## 🚫 Blocked / Open Questions
@@ -168,13 +176,10 @@ _Phase 2, Step 12 — Scan PWA features & Bulk import API coming next_
 ---
 
 ## 🔗 Key Files Modified Last Session
-- `backend/src/app.js` — Added cookie-parser middleware
-- `backend/src/modules/auth/auth.controller.js` — Set HttpOnly cookie for refresh token
-- `backend/src/modules/auth/auth.service.js` — Return user on refresh
-- `frontend/src/App.jsx` — Added auth initialization on mount
-- `frontend/src/stores/auth.store.js` — Added `isLoading` state
-- `frontend/src/components/layout/ProtectedRoute.jsx` — Support `isLoading`
-- `frontend/src/components/layout/Sidebar.jsx` — Added Logout button
+- `scan-pwa/src/pages/ScanPage.jsx` — Added bulk scan and unknown lot mode
+- `scan-pwa/src/utils/gs1Parser.js` — Supported variable length and FNC1
+- `backend/src/modules/imports/*` — Added bulk import API
+- `frontend/src/pages/ImportPage.jsx` — Added CSV upload page
 
 ---
 

@@ -1,41 +1,57 @@
 // Parse GS1 Application Identifiers from structured barcodes
 const GS1_AIS = {
-  '01': 'gtin',     // 14 digits
-  '10': 'lotCode',  // variable length
-  '11': 'prodDate', // YYMMDD
-  '17': 'expDate',  // YYMMDD
-  '30': 'quantity', // variable
+  '01': { key: 'gtin', length: 14 },
+  '10': { key: 'lotCode', variable: true },
+  '11': { key: 'prodDate', length: 6 },
+  '17': { key: 'expDate', length: 6 },
+  '30': { key: 'quantity', variable: true },
 };
 
 export const parseGS1 = (rawCode) => {
-  // Try to extract AIs — fall back to raw code if not GS1
   const result = { raw: rawCode };
-  // GS1 codes start with FNC1 or are structured with AIs
-  // Simple check: if code starts with known AI
-  if (/^\d{2}/.test(rawCode)) {
-    // Attempt AI parsing
-    let pos = 0;
-    while (pos < rawCode.length) {
-      const ai = rawCode.substring(pos, pos + 2);
-      if (GS1_AIS[ai]) {
-        // Simple extraction for lot code (AI 10)
-        if (ai === '10') {
-          // AI 10 is variable length up to FNC1 or end
-          // In a simplified parsing, we'll assume it's the rest of the string for now,
-          // or needs to be properly split if FNC1 is present.
-          result[GS1_AIS[ai]] = rawCode.substring(pos + 2);
-          break;
-        } else if (ai === '01') {
-          result[GS1_AIS[ai]] = rawCode.substring(pos + 2, pos + 16);
-          pos += 16;
+  let code = rawCode;
+  
+  // Clean FNC1 starting prefixes (e.g., ]C1)
+  if (code.startsWith(']C1')) {
+    code = code.substring(3);
+  }
+
+  // GS1-128 parsing
+  let pos = 0;
+  let looksLikeGS1 = false;
+  
+  while (pos < code.length) {
+    const ai = code.substring(pos, pos + 2);
+    const def = GS1_AIS[ai];
+    
+    if (def) {
+      looksLikeGS1 = true;
+      pos += 2;
+      
+      if (def.variable) {
+        // Find next GS/FNC1 separator (\x1D)
+        const endIdx = code.indexOf('\x1D', pos);
+        if (endIdx === -1) {
+          result[def.key] = code.substring(pos);
+          break; // end of string
         } else {
-          // Other variable or fixed length extraction logic would go here
-          break;
+          result[def.key] = code.substring(pos, endIdx);
+          pos = endIdx + 1;
         }
       } else {
-        break;
+        result[def.key] = code.substring(pos, pos + def.length);
+        pos += def.length;
       }
+    } else {
+      // Unknown AI: cannot determine length, so stop parsing
+      break;
     }
   }
+
+  // Fallback: if not parsed as GS1, assume the raw code is the lot code
+  if (!looksLikeGS1 && !result.lotCode) {
+    result.lotCode = rawCode;
+  }
+  
   return result;
 };

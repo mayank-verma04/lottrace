@@ -34,6 +34,7 @@ const EventDetailPage = lazy(() => import('./pages/events/EventDetailPage'));
 const TracePage = lazy(() => import('./pages/trace/TracePage'));
 const AuditLogPage = lazy(() => import('./pages/audit/AuditLogPage'));
 const ComplianceGapsPage = lazy(() => import('./pages/reports/ComplianceGapsPage'));
+const ImportPage = lazy(() => import('./pages/imports/ImportPage'));
 
 const PageLoader = () => (
   <div className="flex h-screen items-center justify-center">
@@ -95,7 +96,7 @@ function App() {
               <Route path="/events/record" element={<RecordEventPage />} />
               <Route path="/events/:id" element={<EventDetailPage />} />
               <Route path="/trace" element={<TracePage />} />
-              <Route path="/imports" element={<div>Imports Placeholder</div>} />
+              <Route path="/imports" element={<ImportPage />} />
               <Route path="/reports/compliance-gaps" element={<ComplianceGapsPage />} />
               <Route path="/recall" element={<div>Recall Placeholder</div>} />
               <Route path="/audit" element={<AuditLogPage />} />

@@ -77,6 +77,7 @@ app.use('/api/v1/events', require('./modules/events/events.routes'));
 app.use('/api/v1/trace', require('./modules/trace/trace.routes'));
 app.use('/api/v1/audit', require('./modules/audit/audit.routes'));
 app.use('/api/v1/reports', require('./modules/reports/reports.routes'));
+app.use('/api/v1/imports', require('./modules/imports/routes'));
 
 // ─── 404 Catch-All ─────────────────────────────────────────
 app.use((_req, res) => {

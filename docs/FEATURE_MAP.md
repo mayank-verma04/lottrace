@@ -91,15 +91,15 @@
 | 2.1 | DB migrations: imports, recall_simulations, notifications, idempotency_keys | database | ✅ |
 | 2.2 | Scan PWA: camera scanning (@zxing/library) | scan-pwa | ✅ |
 | 2.3 | Scan PWA: scan → lookup lot → attach to event | scan-pwa | ✅ |
-| 2.4 | Scan PWA: bulk scan mode (sequential receiving) | scan-pwa | 🔲 |
-| 2.5 | Scan PWA: GS1-128 parsing | scan-pwa | 🔲 |
-| 2.6 | Scan PWA: create new lot from unknown scan | scan-pwa | 🔲 |
+| 2.4 | Scan PWA: bulk scan mode (sequential receiving) | scan-pwa | ✅ |
+| 2.5 | Scan PWA: GS1-128 parsing | scan-pwa | ✅ |
+| 2.6 | Scan PWA: create new lot from unknown scan | scan-pwa | ✅ |
 | 2.7 | PWA manifest + service worker (vite-plugin-pwa) | scan-pwa | ✅ |
-| 2.8 | Bulk CSV import API (POST /imports) | imports | 🔲 |
-| 2.9 | Import validation + per-row error report | imports | 🔲 |
-| 2.10 | Import background job (import-processor.js) | jobs | 🔲 |
-| 2.11 | Import deduplication logic | imports | 🔲 |
-| 2.12 | CSV import templates (downloadable per CTE) | imports | 🔲 |
+| 2.8 | Bulk CSV import API (POST /imports) | imports | ✅ |
+| 2.9 | Import validation + per-row error report | imports | ✅ |
+| 2.10 | Import background job (import-processor.js) | jobs | ✅ |
+| 2.11 | Import deduplication logic | imports | ✅ |
+| 2.12 | CSV import templates (downloadable per CTE) | imports | ✅ |
 | 2.13 | Recall simulation API (POST /recall/simulations) | recall | 🔲 |
 | 2.14 | Recall simulation storage + retrieval | recall | 🔲 |
 | 2.15 | Dashboard stats endpoint (GET /dashboard/stats) | dashboard | 🔲 |
@@ -110,7 +110,7 @@
 | 2.20 | In-app notifications (GET /notifications) | notifications | 🔲 |
 | 2.21 | Idempotency key support on event creation | events | 🔲 |
 | 2.22 | Dashboard page with stats cards + chart | frontend | 🔲 |
-| 2.23 | Bulk import page (upload + progress + errors) | frontend | 🔲 |
+| 2.23 | Bulk import page (upload + progress + errors) | frontend | ✅ |
 | 2.24 | Recall simulation page | frontend | 🔲 |
 | 2.25 | Notification bell + list | frontend | 🔲 |
 | 2.26 | Onboarding checklist UI | frontend | 🔲 |

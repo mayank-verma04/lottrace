@@ -1,4 +1,5 @@
 const exportWorker = require('./workers/export-generator');
+const importWorker = require('./workers/import-processor');
 const logger = require('../utils/logger');
 
 const startWorkers = () => {

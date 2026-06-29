@@ -8,8 +8,10 @@ const connection = new IORedis(env.REDIS_URL, {
 });
 
 const exportQueue = new Queue('export-queue', { connection });
+const importQueue = new Queue('import-queue', { connection });
 
 module.exports = {
   connection,
   exportQueue,
+  importQueue,
 };
