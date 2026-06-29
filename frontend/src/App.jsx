@@ -35,6 +35,8 @@ const TracePage = lazy(() => import('./pages/trace/TracePage'));
 const AuditLogPage = lazy(() => import('./pages/audit/AuditLogPage'));
 const ComplianceGapsPage = lazy(() => import('./pages/reports/ComplianceGapsPage'));
 const ImportPage = lazy(() => import('./pages/imports/ImportPage'));
+const RecallSimulationsPage = lazy(() => import('./pages/recall/RecallSimulationsPage'));
+const RecallSimulationDetailPage = lazy(() => import('./pages/recall/RecallSimulationDetailPage'));
 
 const PageLoader = () => (
   <div className="flex h-screen items-center justify-center">
@@ -98,7 +100,8 @@ function App() {
               <Route path="/trace" element={<TracePage />} />
               <Route path="/imports" element={<ImportPage />} />
               <Route path="/reports/compliance-gaps" element={<ComplianceGapsPage />} />
-              <Route path="/recall" element={<div>Recall Placeholder</div>} />
+              <Route path="/recall" element={<RecallSimulationsPage />} />
+              <Route path="/recall/:id" element={<RecallSimulationDetailPage />} />
               <Route path="/audit" element={<AuditLogPage />} />
             </Route>
             

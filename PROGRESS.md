@@ -23,7 +23,7 @@
 ---
 
 ## 🔄 In Progress
-_Phase 2, Step 14 — Recall Simulation UI, Dashboard stats UI coming next_
+_Phase 2, Step 15 — Dashboard UI_
 
 ---
 
@@ -161,6 +161,11 @@ _Phase 2, Step 14 — Recall Simulation UI, Dashboard stats UI coming next_
  - [x] Dashboard stats endpoint (GET /dashboard/stats)
  - [x] Dashboard recent activity feed (GET /dashboard/activity)
 
+### Step 14: Recall Simulation UI
+ - [x] Recall simulation page (list & run)
+ - [x] Recall simulation detail page (trace results summary)
+ - [x] Wired to App.jsx routes
+
 ---
 
 ## 🚫 Blocked / Open Questions
@@ -182,9 +187,9 @@ _Phase 2, Step 14 — Recall Simulation UI, Dashboard stats UI coming next_
 ---
 
 ## 🔗 Key Files Modified Last Session
-- `backend/src/modules/recall/*` — Added recall simulation API
-- `backend/src/modules/dashboard/*` — Added dashboard stats and activity feed API
-- `backend/src/app.js` — Mounted recall and dashboard routes
+- `frontend/src/api/recall.api.js` — Added frontend API hooks for recall simulations
+- `frontend/src/pages/recall/*` — Created RecallSimulationsPage and RecallSimulationDetailPage
+- `frontend/src/App.jsx` — Mounted recall routes
 
 ---
 

@@ -1,6 +1,5 @@
 const service = require('./service');
 const apiResponse = require('../../utils/apiResponse');
-const { getPaginationParams } = require('../../utils/pagination');
 
 const runSimulation = async (req, res) => {
   const sim = await service.runSimulation(req.user.organizationId, req.user.id, req.body);
@@ -8,13 +7,11 @@ const runSimulation = async (req, res) => {
 };
 
 const listSimulations = async (req, res) => {
-  const pagination = getPaginationParams(req.query);
-  const result = await service.listSimulations(req.user.organizationId, pagination);
-  return apiResponse.success(res, result.data, 'Simulations retrieved', 200, {
-    total: result.total,
-    page: pagination.page,
-    limit: pagination.limit
-  });
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 10;
+
+  const { data, pagination } = await service.listSimulations(req.user.organizationId, { page, limit });
+  return apiResponse.paginated(res, data, pagination, 'Simulations retrieved');
 };
 
 const getSimulation = async (req, res) => {

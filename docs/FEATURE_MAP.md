@@ -111,7 +111,7 @@
 | 2.21 | Idempotency key support on event creation | events | 🔲 |
 | 2.22 | Dashboard page with stats cards + chart | frontend | 🔲 |
 | 2.23 | Bulk import page (upload + progress + errors) | frontend | ✅ |
-| 2.24 | Recall simulation page | frontend | 🔲 |
+| 2.24 | Recall simulation page | frontend | ✅ |
 | 2.25 | Notification bell + list | frontend | 🔲 |
 | 2.26 | Onboarding checklist UI | frontend | 🔲 |
 

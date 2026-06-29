@@ -1,6 +1,7 @@
 const db = require('../../db/knex');
 const traceService = require('../trace/trace.service');
 const AppError = require('../../utils/AppError');
+const { paginate } = require('../../utils/pagination');
 
 const runSimulation = async (organizationId, userId, payload) => {
   const { name, triggeringLotId, params } = payload;
@@ -27,7 +28,7 @@ const runSimulation = async (organizationId, userId, payload) => {
     
     let locationsCount = 0;
     if (eventIds.length > 0) {
-        const locs = await db('events').whereIn('id', eventIds).distinct('location_id').count('location_id as count').first();
+        const locs = await db('events').whereIn('id', eventIds).countDistinct('location_id as count').first();
         locationsCount = parseInt(locs.count, 10);
     }
     const productsCount = new Set(traceResult.nodes.map(n => n.productId)).size;
@@ -57,17 +58,12 @@ const runSimulation = async (organizationId, userId, payload) => {
   }
 };
 
-const listSimulations = async (organizationId, pagination) => {
-  const { limit, offset } = pagination;
-  
+const listSimulations = async (organizationId, { page, limit }) => {
   const query = db('recall_simulations')
     .where({ organization_id: organizationId })
     .orderBy('run_at', 'desc');
     
-  const total = await query.clone().count('id as count').first();
-  const data = await query.limit(limit).offset(offset);
-  
-  return { data, total: parseInt(total.count, 10) };
+  return paginate(query, { page, limit });
 };
 
 const getSimulation = async (organizationId, id) => {
