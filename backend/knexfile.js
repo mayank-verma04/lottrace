@@ -1,9 +1,15 @@
 require('dotenv').config();
 
+const isNeon = process.env.DATABASE_URL && process.env.DATABASE_URL.includes('neon.tech');
+
 /** @type {import('knex').Knex.Config} */
 const commonConfig = {
   client: 'pg',
-  connection: process.env.DATABASE_URL,
+  connection: isNeon ? {
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
+  } : process.env.DATABASE_URL,
+  searchPath: ['public'],
   migrations: {
     directory: './src/db/migrations',
   },
