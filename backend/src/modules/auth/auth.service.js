@@ -12,7 +12,7 @@ const generateTokens = (user, sessionFamily = uuid.v4()) => {
   const accessToken = jwt.sign(
     { sub: user.id, orgId: user.organization_id, role: user.role },
     env.ACCESS_JWT_SECRET,
-    { expiresIn: '15m' }
+    { expiresIn: '30m' }
   );
 
   const rawRefreshToken = crypto.randomBytes(32).toString('hex');
@@ -190,7 +190,7 @@ const forgotPassword = async ({ email }) => {
 
 const resetPassword = async ({ token, newPassword }) => {
   const resetTokenHash = crypto.createHash('sha256').update(token).digest('hex');
-  
+
   const user = await knex('users')
     .where({ password_reset_token_hash: resetTokenHash, status: 'active' })
     .first();
