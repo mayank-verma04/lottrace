@@ -113,7 +113,7 @@
 | 2.23 | Bulk import page (upload + progress + errors) | frontend | ✅ |
 | 2.24 | Recall simulation page | frontend | ✅ |
 | 2.25 | Notification bell + list | frontend | ✅ |
-| 2.26 | Onboarding checklist UI | frontend | 🔲 |
+| 2.26 | Onboarding checklist UI | frontend | ✅ |
 
 **End of Phase 2 = genuinely field-ready**
 

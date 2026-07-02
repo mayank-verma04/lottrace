@@ -17,12 +17,17 @@ const getStats = async (organizationId) => {
     .where({ organization_id: organizationId, has_compliance_gaps: true, status: 'active' })
     .count('id as count').first();
 
+  const totalUsersRes = await db('users').where({ organization_id: organizationId }).count('id as count').first();
+  const totalEventsRes = await db('events').where({ organization_id: organizationId }).count('id as count').first();
+
   return {
     activeLots: parseInt(activeLotsRes.count, 10),
     activeLocations: parseInt(activeLocationsRes.count, 10),
     activeProducts: parseInt(activeProductsRes.count, 10),
     eventsThisWeek: parseInt(eventsThisWeekRes.count, 10),
     openComplianceGaps: parseInt(complianceGapsRes.count, 10),
+    totalUsers: parseInt(totalUsersRes.count, 10),
+    totalEvents: parseInt(totalEventsRes.count, 10),
   };
 };
 

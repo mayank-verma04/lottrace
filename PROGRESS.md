@@ -21,11 +21,12 @@
 ## ✅ Completed
 - [x] Phase 2, Step 17 — Notification bell + list
 - [x] Phase 2, Step 18 — Idempotency key support on event creation
+- [x] Phase 2, Step 19 — Onboarding checklist UI
 
 ---
 
 ## 🔄 In Progress
-_Phase 2, Step 19 — Onboarding checklist UI_
+_Phase 3, Step 1 — DB migrations: api_keys, webhooks, subscriptions_
 
 ---
 

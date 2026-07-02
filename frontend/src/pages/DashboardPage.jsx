@@ -4,6 +4,7 @@ import { useGetDashboardStats, useGetDashboardActivity } from '@/api/dashboard.a
 import { format } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Skeleton } from '@/components/ui/skeleton';
+import { OnboardingChecklist } from '@/components/dashboard/OnboardingChecklist';
 
 export default function DashboardPage() {
   const { data: stats, isLoading: statsLoading } = useGetDashboardStats();
@@ -27,6 +28,12 @@ export default function DashboardPage() {
         title="Dashboard" 
         subtitle="Overview of your LotTrace supply chain activities."
       />
+
+      {statsLoading ? (
+        <Skeleton className="h-32 w-full mb-6" />
+      ) : (
+        <OnboardingChecklist stats={stats} />
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard title="Active Lots" value={stats?.activeLots} loading={statsLoading} />
