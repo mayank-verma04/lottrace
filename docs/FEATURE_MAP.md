@@ -109,7 +109,7 @@
 | 2.19 | Hash chain verifier background job (nightly) | jobs | 🔲 |
 | 2.20 | In-app notifications (GET /notifications) | notifications | 🔲 |
 | 2.21 | Idempotency key support on event creation | events | 🔲 |
-| 2.22 | Dashboard page with stats cards + chart | frontend | 🔲 |
+| 2.22 | Dashboard page with stats cards + chart | frontend | ✅ |
 | 2.23 | Bulk import page (upload + progress + errors) | frontend | ✅ |
 | 2.24 | Recall simulation page | frontend | ✅ |
 | 2.25 | Notification bell + list | frontend | 🔲 |

@@ -23,7 +23,7 @@
 ---
 
 ## 🔄 In Progress
-_Phase 2, Step 15 — Dashboard UI_
+_Phase 2, Step 16 — Background Jobs (Email digest & Hash verifier)_
 
 ---
 
@@ -166,6 +166,11 @@ _Phase 2, Step 15 — Dashboard UI_
  - [x] Recall simulation detail page (trace results summary)
  - [x] Wired to App.jsx routes
 
+### Step 15: Dashboard UI
+ - [x] Dashboard API hooks (stats + activity)
+ - [x] Dashboard page with stats cards + chart
+ - [x] Recharts added to frontend
+ 
 ---
 
 ## 🚫 Blocked / Open Questions
