@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Package, PlusCircle, GitBranch,
-  MapPin, Box, Upload, FileText, AlertTriangle, Shield, Settings, LogOut
+  MapPin, Box, Upload, FileText, AlertTriangle, Shield, Settings, LogOut, Activity
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, permission: '*' },
   { label: 'Lots', path: '/lots', icon: Package, permission: 'lots.read' },
+  { label: 'Events', path: '/events', icon: Activity, permission: 'events.read' },
   { label: 'Record Event', path: '/events/record', icon: PlusCircle, permission: 'events.create' },
   { label: 'Trace', path: '/trace', icon: GitBranch, permission: 'trace.read' },
   { label: 'Locations', path: '/locations', icon: MapPin, permission: 'locations.read' },

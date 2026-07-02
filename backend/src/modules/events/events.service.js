@@ -181,8 +181,12 @@ const getEvents = async (query, organizationId) => {
   const total = parseInt(countResult.count, 10);
 
   const events = await queryBuilder
+    .leftJoin('locations', 'events.location_id', 'locations.id')
+    .leftJoin('users', 'events.recorded_by', 'users.id')
     .select(
       'events.*',
+      'locations.name as location_name',
+      db.raw("users.first_name || ' ' || users.last_name as recorded_by_name"),
       db.raw(`(
         SELECT json_agg(json_build_object('id', lots.id, 'traceabilityLotCode', lots.traceability_lot_code, 'direction', ell.direction, 'quantity', ell.quantity, 'uom', ell.uom))
         FROM event_lot_links ell
@@ -190,7 +194,7 @@ const getEvents = async (query, organizationId) => {
         WHERE ell.event_id = events.id
       ) as lot_links`)
     )
-    .orderBy('created_at', 'desc')
+    .orderBy('events.created_at', 'desc')
     .limit(limit)
     .offset(offset);
 
