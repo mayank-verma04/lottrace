@@ -24,10 +24,21 @@ const resetPasswordSchema = z.object({
   newPassword: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
+const verifyEmailSchema = z.object({
+  email: z.string().email('Invalid email address').toLowerCase(),
+  otp: z.string().length(6, 'OTP must be exactly 6 digits').regex(/^\d{6}$/, 'OTP must be 6 digits'),
+});
+
+const resendVerificationSchema = z.object({
+  email: z.string().email('Invalid email address').toLowerCase(),
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
   refreshSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  verifyEmailSchema,
+  resendVerificationSchema,
 };

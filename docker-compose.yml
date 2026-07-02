@@ -45,14 +45,6 @@ services:
       - minio-data:/data
     command: server /data --console-address ":9001"
 
-  mailpit:
-    image: axllent/mailpit:latest
-    container_name: lottrace-mailpit
-    restart: unless-stopped
-    ports:
-      - '1025:1025'
-      - '8025:8025'
-
   # pgadmin:
   #   image: dpage/pgadmin4
   #   container_name: lottrace-pgadmin

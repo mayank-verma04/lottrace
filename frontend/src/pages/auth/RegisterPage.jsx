@@ -28,8 +28,8 @@ export default function RegisterPage() {
   const onSubmit = async (data) => {
     try {
       await api.post('/auth/register', data);
-      toast.success('Registration successful. You can now login.');
-      navigate('/login');
+      toast.success('Registration successful! Please check your email for a verification code.');
+      navigate('/verify-email', { state: { email: data.email } });
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to register');
     }

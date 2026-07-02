@@ -32,7 +32,11 @@ const worker = new Worker('email-queue', async (job) => {
   
   logger.info(`Processing email job: ${job.id}, type: ${type}`);
   
-  if (type === 'compliance_gap') {
+  if (type === 'verification_otp') {
+    await emailService.sendVerificationEmail(data.email, data.otp, data.firstName);
+  } else if (type === 'welcome') {
+    await emailService.sendWelcomeEmail(data.email, data.firstName, data.organizationName);
+  } else if (type === 'compliance_gap') {
     await emailService.sendComplianceGapEmail(
       data.email, 
       data.eventId, 

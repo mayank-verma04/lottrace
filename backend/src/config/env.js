@@ -19,11 +19,10 @@ const envSchema = z.object({
   S3_SECRET_ACCESS_KEY: z.string().optional(),
   S3_BUCKET: z.string().default('lottrace-dev'),
 
-  // Email
-  EMAIL_PROVIDER: z.string().default('smtp'),
-  SMTP_HOST: z.string().optional(),
-  SMTP_PORT: z.coerce.number().optional(),
-  EMAIL_FROM: z.string().default('noreply@lottrace.local'),
+  // Email (Resend)
+  RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required'),
+  EMAIL_FROM: z.string().default('LotTrace <onboarding@resend.dev>'),
+  DEV_EMAIL_OVERRIDE: z.string().email().optional(), // Redirect ALL emails to this address in dev
 
   // App
   NODE_ENV: z.enum(['development', 'staging', 'production']).default('development'),

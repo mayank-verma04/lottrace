@@ -6,7 +6,25 @@ const env = require('../../config/env');
 const AppError = require('../../utils/AppError');
 const uuid = require('uuid');
 const redis = require('../../config/redis');
-const emailService = require('../../utils/email');
+const { emailQueue } = require('../../jobs/queues');
+const logger = require('../../utils/logger');
+
+/**
+ * Generate a 6-digit OTP string
+ * @returns {string}
+ */
+const generateOtp = () => {
+  return crypto.randomInt(100000, 999999).toString();
+};
+
+/**
+ * Hash an OTP with SHA-256
+ * @param {string} otp
+ * @returns {string}
+ */
+const hashOtp = (otp) => {
+  return crypto.createHash('sha256').update(otp).digest('hex');
+};
 
 const generateTokens = (user, sessionFamily = uuid.v4()) => {
   const accessToken = jwt.sign(
@@ -48,6 +66,11 @@ const register = async ({ firstName, lastName, email, password, organizationName
     const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
     const userId = uuid.v4();
 
+    // Generate verification OTP
+    const otp = generateOtp();
+    const otpHash = hashOtp(otp);
+    const verificationExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
     const [user] = await trx('users').insert({
       id: userId,
       organization_id: orgId,
@@ -57,21 +80,21 @@ const register = async ({ firstName, lastName, email, password, organizationName
       password_hash: passwordHash,
       role: 'org_admin',
       status: 'active',
+      email_verified: false,
+      verification_otp: otpHash,
+      verification_expires_at: verificationExpiresAt,
     }).returning('*');
 
-    const tokens = generateTokens(user);
-
-    await trx('refresh_tokens').insert({
-      user_id: user.id,
-      token_hash: tokens.refreshTokenHash,
-      session_family: tokens.sessionFamily,
-      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    // Queue verification email
+    await emailQueue.add('verification_otp', {
+      type: 'verification_otp',
+      data: { email: user.email, otp, firstName: user.first_name },
     });
 
+    // Don't issue tokens — user must verify email first
     return {
-      user: { id: user.id, email: user.email, role: user.role, organizationId: user.organization_id },
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.rawRefreshToken,
+      requiresVerification: true,
+      email: user.email,
     };
   });
 };
@@ -85,6 +108,15 @@ const login = async ({ email, password }) => {
   const valid = await argon2.verify(user.password_hash, password);
   if (!valid) {
     throw new AppError('Invalid credentials', 'INVALID_CREDENTIALS', 401);
+  }
+
+  // Block unverified users
+  if (!user.email_verified) {
+    throw new AppError(
+      'Please verify your email address before logging in. Check your inbox for the verification code.',
+      'EMAIL_NOT_VERIFIED',
+      403
+    );
   }
 
   await knex('users').where({ id: user.id }).update({ last_login_at: knex.fn.now() });
@@ -103,6 +135,115 @@ const login = async ({ email, password }) => {
     accessToken: tokens.accessToken,
     refreshToken: tokens.rawRefreshToken,
   };
+};
+
+/**
+ * Verify email with 6-digit OTP
+ * @param {{ email: string, otp: string }} params
+ */
+const verifyEmail = async ({ email, otp }) => {
+  const otpHash = hashOtp(otp);
+
+  const user = await knex('users')
+    .where({ email, verification_otp: otpHash, status: 'active' })
+    .first();
+
+  if (!user) {
+    throw new AppError('Invalid verification code', 'INVALID_VERIFICATION_CODE', 400);
+  }
+
+  if (!user.verification_expires_at || new Date() > new Date(user.verification_expires_at)) {
+    throw new AppError(
+      'Verification code has expired. Please request a new one.',
+      'VERIFICATION_EXPIRED',
+      400
+    );
+  }
+
+  return knex.transaction(async (trx) => {
+    await trx('users')
+      .where({ id: user.id })
+      .update({
+        email_verified: true,
+        verification_otp: null,
+        verification_expires_at: null,
+        last_login_at: trx.fn.now(),
+        updated_at: trx.fn.now(),
+      });
+
+    const tokens = generateTokens(user);
+
+    await trx('refresh_tokens').insert({
+      user_id: user.id,
+      token_hash: tokens.refreshTokenHash,
+      session_family: tokens.sessionFamily,
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    });
+
+    // Fetch org name for welcome email
+    const org = await trx('organizations').where({ id: user.organization_id }).first();
+
+    // Queue welcome email
+    await emailQueue.add('welcome', {
+      type: 'welcome',
+      data: {
+        email: user.email,
+        firstName: user.first_name,
+        organizationName: org?.name || 'your organization',
+      },
+    });
+
+    return {
+      user: { id: user.id, email: user.email, role: user.role, organizationId: user.organization_id },
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.rawRefreshToken,
+    };
+  });
+};
+
+/**
+ * Resend verification OTP
+ * @param {{ email: string }} params
+ */
+const resendVerification = async ({ email }) => {
+  const user = await knex('users')
+    .where({ email, email_verified: false, status: 'active' })
+    .first();
+
+  if (!user) {
+    // Silent success to prevent email enumeration
+    return;
+  }
+
+  // Rate limit: don't resend if last OTP was sent < 2 minutes ago
+  if (user.verification_expires_at) {
+    const otpSentAt = new Date(user.verification_expires_at).getTime() - 15 * 60 * 1000;
+    const twoMinutesAgo = Date.now() - 2 * 60 * 1000;
+    if (otpSentAt > twoMinutesAgo) {
+      throw new AppError(
+        'Please wait before requesting a new verification code.',
+        'RATE_LIMITED',
+        429
+      );
+    }
+  }
+
+  const otp = generateOtp();
+  const otpHash = hashOtp(otp);
+  const verificationExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+  await knex('users')
+    .where({ id: user.id })
+    .update({
+      verification_otp: otpHash,
+      verification_expires_at: verificationExpiresAt,
+      updated_at: knex.fn.now(),
+    });
+
+  await emailQueue.add('verification_otp', {
+    type: 'verification_otp',
+    data: { email: user.email, otp, firstName: user.first_name },
+  });
 };
 
 const refresh = async ({ refreshToken }) => {
@@ -185,6 +326,7 @@ const forgotPassword = async ({ email }) => {
       updated_at: knex.fn.now()
     });
 
+  const emailService = require('../../utils/email');
   await emailService.sendPasswordResetEmail(user.email, resetToken);
 };
 
@@ -220,6 +362,8 @@ const resetPassword = async ({ token, newPassword }) => {
 module.exports = {
   register,
   login,
+  verifyEmail,
+  resendVerification,
   refresh,
   logout,
   forgotPassword,

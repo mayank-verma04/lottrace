@@ -12,9 +12,8 @@ const setRefreshTokenCookie = (res, refreshToken) => {
 
 const register = async (req, res) => {
   const result = await authService.register(req.validatedBody);
-  setRefreshTokenCookie(res, result.refreshToken);
-  delete result.refreshToken;
-  return apiResponse.created(res, result, 'User registered successfully');
+  // No tokens issued — user must verify email first
+  return apiResponse.created(res, result, 'Registration successful. Please check your email for a verification code.');
 };
 
 const login = async (req, res) => {
@@ -22,6 +21,18 @@ const login = async (req, res) => {
   setRefreshTokenCookie(res, result.refreshToken);
   delete result.refreshToken;
   return apiResponse.success(res, result, 'Login successful');
+};
+
+const verifyEmail = async (req, res) => {
+  const result = await authService.verifyEmail(req.validatedBody);
+  setRefreshTokenCookie(res, result.refreshToken);
+  delete result.refreshToken;
+  return apiResponse.success(res, result, 'Email verified successfully');
+};
+
+const resendVerification = async (req, res) => {
+  await authService.resendVerification(req.validatedBody);
+  return apiResponse.success(res, null, 'If that email is pending verification, a new code has been sent.');
 };
 
 const refresh = async (req, res) => {
@@ -62,6 +73,8 @@ const resetPassword = async (req, res) => {
 module.exports = {
   register,
   login,
+  verifyEmail,
+  resendVerification,
   refresh,
   logout,
   forgotPassword,
