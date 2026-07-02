@@ -4,6 +4,7 @@ const tenantScope = require('../../middleware/tenantScope');
 const validate = require('../../middleware/validate');
 const rbac = require('../../middleware/rbac');
 const auditLogger = require('../../middleware/auditLogger');
+const idempotency = require('../../middleware/idempotency');
 const eventsController = require('./events.controller');
 const { createEventSchema, voidEventSchema, amendEventSchema } = require('./events.validation');
 
@@ -15,6 +16,7 @@ router.use(tenantScope);
 router.post(
   '/',
   rbac(['org_admin', 'compliance_manager', 'operator']),
+  idempotency,
   validate(createEventSchema),
   eventsController.createEvent
 );

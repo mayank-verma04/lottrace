@@ -20,11 +20,12 @@
 
 ## ✅ Completed
 - [x] Phase 2, Step 17 — Notification bell + list
+- [x] Phase 2, Step 18 — Idempotency key support on event creation
 
 ---
 
 ## 🔄 In Progress
-_Phase 2, Step 18 — Idempotency key support on event creation_
+_Phase 2, Step 19 — Onboarding checklist UI_
 
 ---
 
