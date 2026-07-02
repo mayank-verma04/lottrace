@@ -19,11 +19,12 @@
 ---
 
 ## ✅ Completed
+- [x] Phase 2, Step 17 — Notification bell + list
 
 ---
 
 ## 🔄 In Progress
-_Phase 2, Step 17 — Notification bell + list_
+_Phase 2, Step 18 — Idempotency key support on event creation_
 
 ---
 
@@ -170,6 +171,10 @@ _Phase 2, Step 17 — Notification bell + list_
  - [x] Dashboard API hooks (stats + activity)
  - [x] Dashboard page with stats cards + chart
  - [x] Recharts added to frontend
+ 
+### Step 16: Notifications & Alerts
+ - [x] Backend notifications module (GET /notifications)
+ - [x] NotificationBell UI and react-query hooks
  
 ---
 
