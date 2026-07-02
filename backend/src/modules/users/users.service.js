@@ -76,14 +76,18 @@ const getUserById = async (organizationId, userId) => {
  * @param {string} invitedBy - ID of user sending invite
  */
 const inviteUser = async (organizationId, data, invitedBy) => {
-  // Check duplicate email within org
+  // Check duplicate email globally
   const existing = await db('users')
-    .where({ email: data.email, organization_id: organizationId })
+    .where({ email: data.email })
     .whereNot({ status: 'deactivated' })
     .first();
 
   if (existing) {
-    throw new AppError('A user with this email already exists in this organization', 'DUPLICATE_ENTRY', 409);
+    if (existing.organization_id === organizationId) {
+      throw new AppError('User is already in this organization', 'DUPLICATE_ENTRY', 409);
+    } else {
+      throw new AppError('This email is already registered to another organization', 'DUPLICATE_ENTRY', 409);
+    }
   }
 
   // Generate invite token
