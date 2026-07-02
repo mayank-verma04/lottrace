@@ -52,11 +52,11 @@ const register = async ({ firstName, lastName, email, password, organizationName
   }
 
   const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
-  
+
   // Generate verification OTP
   const otp = generateOtp();
   const otpHash = hashOtp(otp);
-  
+
   const pendingPayload = {
     firstName,
     lastName,
@@ -70,7 +70,7 @@ const register = async ({ firstName, lastName, email, password, organizationName
     `signup:${email}`,
     JSON.stringify(pendingPayload),
     'EX',
-    900 // 15 minutes
+    1800 // 30 minutes
   );
 
   // Queue verification email
@@ -201,7 +201,7 @@ const resendVerification = async ({ email }) => {
     // Silent success to prevent email enumeration
     return;
   }
-  
+
   const ttl = await redis.ttl(`signup:${email}`);
 
   // Rate limit: don't resend if last OTP was sent < 2 minutes ago
