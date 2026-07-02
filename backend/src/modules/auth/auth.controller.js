@@ -70,6 +70,13 @@ const resetPassword = async (req, res) => {
   return apiResponse.success(res, null, 'Password reset successfully');
 };
 
+const acceptInvite = async (req, res) => {
+  const result = await authService.acceptInvite(req.validatedBody);
+  setRefreshTokenCookie(res, result.refreshToken);
+  delete result.refreshToken;
+  return apiResponse.success(res, result, 'Invitation accepted');
+};
+
 module.exports = {
   register,
   login,
@@ -79,4 +86,5 @@ module.exports = {
   logout,
   forgotPassword,
   resetPassword,
+  acceptInvite,
 };

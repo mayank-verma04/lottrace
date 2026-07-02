@@ -17,6 +17,8 @@ const auditLogger = (actionPrefix) => {
             if (req.path.includes('/amend')) specificAction = `${actionPrefix}.amend`;
             if (req.path.includes('/deactivate')) specificAction = `${actionPrefix}.deactivate`;
             if (req.path.includes('/reactivate')) specificAction = `${actionPrefix}.reactivate`;
+            if (req.path.includes('/resend-invite')) specificAction = `${actionPrefix}.resend_invite`;
+            if (req.path === '/invite' || req.path.endsWith('/invite')) specificAction = `${actionPrefix}.invite`;
             
             await writeAuditLog({
               organizationId: req.organizationId,

@@ -13,5 +13,6 @@ router.post('/refresh', authController.refresh);
 router.post('/logout', authController.logout);
 router.post('/forgot-password', validate(authValidation.forgotPasswordSchema), authController.forgotPassword);
 router.post('/reset-password', validate(authValidation.resetPasswordSchema), authController.resetPassword);
+router.post('/accept-invite', validate(authValidation.acceptInviteSchema), authController.acceptInvite);
 
 module.exports = router;

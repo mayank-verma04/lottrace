@@ -261,6 +261,38 @@ const formatUser = (user) => ({
   updatedAt: user.updated_at,
 });
 
+/**
+ * Resend an invite for a pending (status='invited') user.
+ * Generates a fresh token and extends expiry by 72h.
+ * @param {string} organizationId
+ * @param {string} userId
+ */
+const resendInvite = async (organizationId, userId) => {
+  const user = await db('users')
+    .where({ id: userId, organization_id: organizationId })
+    .first();
+
+  if (!user) {
+    throw new AppError('User not found', 'NOT_FOUND', 404);
+  }
+  if (user.status !== 'invited') {
+    throw new AppError('Only pending invitations can be resent', 'CONFLICT', 409);
+  }
+
+  const inviteToken = crypto.randomBytes(32).toString('hex');
+  const inviteTokenHash = crypto.createHash('sha256').update(inviteToken).digest('hex');
+  const inviteExpiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000);
+
+  await db('users')
+    .where({ id: userId })
+    .update({ invite_token_hash: inviteTokenHash, invite_expires_at: inviteExpiresAt, updated_at: db.fn.now() });
+
+  const org = await db('organizations').where({ id: organizationId }).select('name').first();
+  await emailService.sendInviteEmail(user.email, inviteToken, org ? org.name : 'LotTrace');
+
+  return formatUser(user);
+};
+
 module.exports = {
   listUsers,
   getUserById,
@@ -268,4 +300,5 @@ module.exports = {
   updateUser,
   deactivateUser,
   reactivateUser,
+  resendInvite,
 };

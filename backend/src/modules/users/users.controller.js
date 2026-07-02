@@ -38,6 +38,11 @@ const reactivateUser = async (req, res) => {
   return apiResponse.success(res, user, 'User reactivated successfully');
 };
 
+const resendInvite = async (req, res) => {
+  const user = await usersService.resendInvite(req.organizationId, req.params.userId);
+  return apiResponse.success(res, user, 'Invite resent successfully');
+};
+
 module.exports = {
   listUsers,
   getUser,
@@ -45,4 +50,5 @@ module.exports = {
   updateUser,
   deactivateUser,
   reactivateUser,
+  resendInvite,
 };

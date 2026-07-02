@@ -2,8 +2,8 @@
 
 ## Current Status
 **Phase:** Phase 1 — Trace Core / MVP (Complete)
-**Last Updated:** 2026-06-28
-**Last Session:** Phase 1 Final Polish (UI wiring & fixes)
+**Last Updated:** 2026-07-02
+**Last Session:** Invite User flow — end-to-end fix (accept-invite endpoint, resend/cancel, UI dialogs, audit logging, branded emails)
 
 ---
 
@@ -71,11 +71,16 @@ _Phase 3, Step 1 — DB migrations: api_keys, webhooks, subscriptions_
 - [x] PATCH /api/v1/users/:userId
 - [x] POST /api/v1/users/:userId/deactivate
 - [x] POST /api/v1/users/:userId/reactivate
+- [x] POST /api/v1/users/:userId/resend-invite
+- [x] POST /api/v1/auth/accept-invite (token-based account activation)
+- [x] Audit logging on invite/update/deactivate/reactivate/resend-invite routes
+- [x] Branded HTML email templates for invite + password reset
 - [x] Reusable pagination utility
 
 ### Step 5: Auth UI + User Management UI (Frontend)
 - [x] Auth UI (login, register, forgot-password pages)
-- [x] User management UI
+- [x] User management UI (invite dialog, status badges, row-actions dropdown)
+- [x] Accept Invite page (`/accept-invite`) — activates account, auto-signs in to `/dashboard`
 - [x] Organization settings page
 
 ### Step 6: Core Trace DB + Locations/Products (Phase 1 Start)
@@ -199,11 +204,24 @@ _Phase 3, Step 1 — DB migrations: api_keys, webhooks, subscriptions_
 ---
 
 ## 🔗 Key Files Modified Last Session
-- `frontend/src/api/recall.api.js` — Added frontend API hooks for recall simulations
-- `frontend/src/pages/recall/*` — Created RecallSimulationsPage and RecallSimulationDetailPage
-- `frontend/src/App.jsx` — Mounted recall routes
+- `backend/src/modules/auth/auth.validation.js` — Added `acceptInviteSchema`
+- `backend/src/modules/auth/auth.service.js` — Added `acceptInvite` service
+- `backend/src/modules/auth/auth.controller.js` — Added `acceptInvite` controller
+- `backend/src/modules/auth/auth.routes.js` — Registered `POST /accept-invite`
+- `backend/src/modules/users/users.service.js` — Added `resendInvite` service
+- `backend/src/modules/users/users.controller.js` — Added `resendInvite` controller
+- `backend/src/modules/users/users.routes.js` — Added `resend-invite` route + `auditLogger` on all mutating routes
+- `backend/src/middleware/auditLogger.js` — Added `/invite` and `/resend-invite` path detection
+- `backend/src/utils/email.js` — Upgraded `sendInviteEmail` + `sendPasswordResetEmail` to branded HTML templates
+- `frontend/src/api/users.api.js` — New file: React Query hooks for users
+- `frontend/src/pages/auth/AcceptInvitePage.jsx` — New file: accept invite page
+- `frontend/src/pages/settings/UsersPage.jsx` — Full rewrite: invite dialog, status badges, row-actions dropdown
+- `frontend/src/App.jsx` — Added `/accept-invite` route
+- `bruno/Auth/Accept Invite.bru` — New Bruno collection file
+- `bruno/Users/Resend Invite.bru` — New Bruno collection file
 
 ---
 
 ## 📌 Known Technical Debt
 _Track items here as they're deferred_
+- `UsersPage.jsx` `can('org_admin')` check is slightly non-idiomatic vs. granular permission strings like `can('users.invite')` — works correctly today but worth aligning with other modules in a future cleanup session.

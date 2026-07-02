@@ -359,6 +359,54 @@ const resetPassword = async ({ token, newPassword }) => {
   });
 };
 
+/**
+ * Accept an invite by setting a password and activating the account.
+ * Mirrors shape of verifyEmail with token-based lookup.
+ * @param {{ token: string, email: string, password: string }} params
+ */
+const acceptInvite = async ({ token, email, password }) => {
+  const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+  const user = await knex('users')
+    .where({ email, invite_token_hash: tokenHash, status: 'invited' })
+    .first();
+
+  if (!user || !user.invite_expires_at || new Date() > new Date(user.invite_expires_at)) {
+    throw new AppError('Invalid or expired invitation', 'INVALID_TOKEN', 400);
+  }
+
+  const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
+
+  return knex.transaction(async (trx) => {
+    await trx('users')
+      .where({ id: user.id })
+      .update({
+        password_hash: passwordHash,
+        status: 'active',
+        email_verified: true,
+        invite_token_hash: null,
+        invite_expires_at: null,
+        last_login_at: trx.fn.now(),
+        updated_at: trx.fn.now(),
+      });
+
+    const tokens = generateTokens(user);
+
+    await trx('refresh_tokens').insert({
+      user_id: user.id,
+      token_hash: tokens.refreshTokenHash,
+      session_family: tokens.sessionFamily,
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    });
+
+    return {
+      user: { id: user.id, email: user.email, role: user.role, organizationId: user.organization_id },
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.rawRefreshToken,
+    };
+  });
+};
+
 module.exports = {
   register,
   login,
@@ -368,4 +416,5 @@ module.exports = {
   logout,
   forgotPassword,
   resetPassword,
+  acceptInvite,
 };
