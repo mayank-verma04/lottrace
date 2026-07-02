@@ -9,9 +9,13 @@ const connection = new IORedis(env.REDIS_URL, {
 
 const exportQueue = new Queue('export-queue', { connection });
 const importQueue = new Queue('import-queue', { connection });
+const emailQueue = new Queue('email-queue', { connection });
+const hashVerifyQueue = new Queue('hash-verify-queue', { connection });
 
 module.exports = {
   connection,
   exportQueue,
   importQueue,
+  emailQueue,
+  hashVerifyQueue,
 };

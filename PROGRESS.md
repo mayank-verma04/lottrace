@@ -23,7 +23,7 @@
 ---
 
 ## 🔄 In Progress
-_Phase 2, Step 16 — Background Jobs (Email digest & Hash verifier)_
+_Phase 2, Step 17 — Notification bell + list_
 
 ---
 

@@ -70,4 +70,56 @@ const sendInviteEmail = async (email, token, organizationName) => {
 module.exports = {
   sendPasswordResetEmail,
   sendInviteEmail,
+  sendComplianceGapEmail: async (email, eventId, locationName, eventType, timestamp, gaps) => {
+    const link = `${env.FRONTEND_URL}/events/${eventId}`;
+    
+    if (process.env.NODE_ENV === 'development') {
+      logger.info(`[DEV] Compliance gap email for ${email} on event ${eventId}`);
+      return;
+    }
+
+    try {
+      await resend.emails.send({
+        from: 'LotTrace Alerts <alerts@lottrace.com>',
+        to: email,
+        subject: `Compliance Gap Detected: ${eventType} at ${locationName}`,
+        html: `
+          <p>A new event was recorded with missing Key Data Elements.</p>
+          <ul>
+            <li><strong>Event ID:</strong> ${eventId}</li>
+            <li><strong>Type:</strong> ${eventType}</li>
+            <li><strong>Location:</strong> ${locationName}</li>
+            <li><strong>Time:</strong> ${new Date(timestamp).toLocaleString()}</li>
+            <li><strong>Gaps:</strong> ${gaps.map(g => g.field).join(', ')}</li>
+          </ul>
+          <p><a href="${link}">View Event in LotTrace</a></p>
+        `,
+      });
+    } catch (error) {
+      logger.error({ err: error, email }, 'Failed to send compliance gap email');
+    }
+  },
+  sendComplianceDigestEmail: async (email, organizationName, openGapsCount) => {
+    const link = `${env.FRONTEND_URL}/compliance-gaps`;
+    
+    if (process.env.NODE_ENV === 'development') {
+      logger.info(`[DEV] Compliance digest email for ${email} with ${openGapsCount} gaps`);
+      return;
+    }
+
+    try {
+      await resend.emails.send({
+        from: 'LotTrace Alerts <alerts@lottrace.com>',
+        to: email,
+        subject: `Weekly Compliance Digest: ${organizationName}`,
+        html: `
+          <p>Your weekly compliance digest for <strong>${organizationName}</strong> is ready.</p>
+          <p>You currently have <strong>${openGapsCount}</strong> open compliance gaps requiring attention.</p>
+          <p><a href="${link}">View Open Gaps in LotTrace</a></p>
+        `,
+      });
+    } catch (error) {
+      logger.error({ err: error, email }, 'Failed to send compliance digest email');
+    }
+  }
 };

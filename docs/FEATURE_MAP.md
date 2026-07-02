@@ -104,9 +104,9 @@
 | 2.14 | Recall simulation storage + retrieval | recall | ✅ |
 | 2.15 | Dashboard stats endpoint (GET /dashboard/stats) | dashboard | ✅ |
 | 2.16 | Dashboard recent activity feed | dashboard | ✅ |
-| 2.17 | Compliance gap email notification | jobs | 🔲 |
-| 2.18 | Email batch digest (not per-gap storm) | jobs | 🔲 |
-| 2.19 | Hash chain verifier background job (nightly) | jobs | 🔲 |
+| 2.17 | Compliance gap email notification | jobs | ✅ |
+| 2.18 | Email batch digest (not per-gap storm) | jobs | ✅ |
+| 2.19 | Hash chain verifier background job (nightly) | jobs | ✅ |
 | 2.20 | In-app notifications (GET /notifications) | notifications | 🔲 |
 | 2.21 | Idempotency key support on event creation | events | 🔲 |
 | 2.22 | Dashboard page with stats cards + chart | frontend | ✅ |

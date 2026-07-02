@@ -126,6 +126,32 @@ const createEvent = async (data, organizationId, userId, overrideStatus = 'activ
     await Promise.all(
       affectedLotIds.map(lid => invalidateTraceCache(organizationId, lid))
     );
+    
+    // If compliance gaps exist, queue an email alert
+    if (complianceGaps) {
+      const { emailQueue } = require('../../jobs/queues');
+      const users = await trx('users')
+        .where({ organization_id: organizationId, status: 'active' })
+        .whereIn('role', ['compliance_manager']);
+        
+      const location = data.locationId ? await trx('locations').where({ id: data.locationId }).first() : null;
+      const locationName = location ? location.name : 'Unknown Location';
+      const parsedGaps = JSON.parse(complianceGaps);
+      
+      for (const user of users) {
+        await emailQueue.add('compliance_gap_alert', {
+          type: 'compliance_gap',
+          data: {
+            email: user.email,
+            eventId: eventId,
+            locationName,
+            eventType: data.eventType,
+            timestamp: data.eventDatetime,
+            gaps: parsedGaps
+          }
+        });
+      }
+    }
 
     return event;
   });
