@@ -46,57 +46,44 @@ const generateTokens = (user, sessionFamily = uuid.v4()) => {
 };
 
 const register = async ({ firstName, lastName, email, password, organizationName }) => {
-  return knex.transaction(async (trx) => {
-    const existingUser = await trx('users').where({ email }).first();
-    if (existingUser) {
-      throw new AppError('Email already in use', 'EMAIL_IN_USE', 400);
-    }
+  const existingUser = await knex('users').where({ email }).first();
+  if (existingUser) {
+    throw new AppError('Email already in use', 'EMAIL_IN_USE', 400);
+  }
 
-    const orgId = uuid.v4();
-    const orgSlug = organizationName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
+  
+  // Generate verification OTP
+  const otp = generateOtp();
+  const otpHash = hashOtp(otp);
+  
+  const pendingPayload = {
+    firstName,
+    lastName,
+    email,
+    passwordHash,
+    organizationName,
+    otpHash
+  };
 
-    await trx('organizations').insert({
-      id: orgId,
-      name: organizationName,
-      slug: orgSlug + '-' + crypto.randomBytes(4).toString('hex'),
-      plan_tier: 'starter',
-      status: 'active',
-    });
+  await redis.set(
+    `signup:${email}`,
+    JSON.stringify(pendingPayload),
+    'EX',
+    900 // 15 minutes
+  );
 
-    const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
-    const userId = uuid.v4();
-
-    // Generate verification OTP
-    const otp = generateOtp();
-    const otpHash = hashOtp(otp);
-    const verificationExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
-
-    const [user] = await trx('users').insert({
-      id: userId,
-      organization_id: orgId,
-      first_name: firstName,
-      last_name: lastName,
-      email,
-      password_hash: passwordHash,
-      role: 'org_admin',
-      status: 'active',
-      email_verified: false,
-      verification_otp: otpHash,
-      verification_expires_at: verificationExpiresAt,
-    }).returning('*');
-
-    // Queue verification email
-    await emailQueue.add('verification_otp', {
-      type: 'verification_otp',
-      data: { email: user.email, otp, firstName: user.first_name },
-    });
-
-    // Don't issue tokens — user must verify email first
-    return {
-      requiresVerification: true,
-      email: user.email,
-    };
+  // Queue verification email
+  await emailQueue.add('verification_otp', {
+    type: 'verification_otp',
+    data: { email, otp, firstName },
   });
+
+  // Don't issue tokens — user must verify email first
+  return {
+    requiresVerification: true,
+    email,
+  };
 };
 
 const login = async ({ email, password }) => {
@@ -110,14 +97,8 @@ const login = async ({ email, password }) => {
     throw new AppError('Invalid credentials', 'INVALID_CREDENTIALS', 401);
   }
 
-  // Block unverified users
-  if (!user.email_verified) {
-    throw new AppError(
-      'Please verify your email address before logging in. Check your inbox for the verification code.',
-      'EMAIL_NOT_VERIFIED',
-      403
-    );
-  }
+  // Pending unverified users are now in Redis and won't exist in PostgreSQL.
+  // We can remove the old !user.email_verified check here.
 
   await knex('users').where({ id: user.id }).update({ last_login_at: knex.fn.now() });
 
@@ -144,32 +125,41 @@ const login = async ({ email, password }) => {
 const verifyEmail = async ({ email, otp }) => {
   const otpHash = hashOtp(otp);
 
-  const user = await knex('users')
-    .where({ email, verification_otp: otpHash, status: 'active' })
-    .first();
+  const pendingStr = await redis.get(`signup:${email}`);
+  if (!pendingStr) {
+    throw new AppError('Invalid or expired verification code', 'INVALID_VERIFICATION_CODE', 400);
+  }
 
-  if (!user) {
+  const payload = JSON.parse(pendingStr);
+  if (payload.otpHash !== otpHash) {
     throw new AppError('Invalid verification code', 'INVALID_VERIFICATION_CODE', 400);
   }
 
-  if (!user.verification_expires_at || new Date() > new Date(user.verification_expires_at)) {
-    throw new AppError(
-      'Verification code has expired. Please request a new one.',
-      'VERIFICATION_EXPIRED',
-      400
-    );
-  }
-
   return knex.transaction(async (trx) => {
-    await trx('users')
-      .where({ id: user.id })
-      .update({
-        email_verified: true,
-        verification_otp: null,
-        verification_expires_at: null,
-        last_login_at: trx.fn.now(),
-        updated_at: trx.fn.now(),
-      });
+    const orgId = uuid.v4();
+    const orgSlug = payload.organizationName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+    await trx('organizations').insert({
+      id: orgId,
+      name: payload.organizationName,
+      slug: orgSlug + '-' + crypto.randomBytes(4).toString('hex'),
+      plan_tier: 'starter',
+      status: 'active',
+    });
+
+    const userId = uuid.v4();
+
+    const [user] = await trx('users').insert({
+      id: userId,
+      organization_id: orgId,
+      first_name: payload.firstName,
+      last_name: payload.lastName,
+      email: payload.email,
+      password_hash: payload.passwordHash,
+      role: 'org_admin',
+      status: 'active',
+      last_login_at: trx.fn.now()
+    }).returning('*');
 
     const tokens = generateTokens(user);
 
@@ -180,18 +170,17 @@ const verifyEmail = async ({ email, otp }) => {
       expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
 
-    // Fetch org name for welcome email
-    const org = await trx('organizations').where({ id: user.organization_id }).first();
-
     // Queue welcome email
     await emailQueue.add('welcome', {
       type: 'welcome',
       data: {
         email: user.email,
         firstName: user.first_name,
-        organizationName: org?.name || 'your organization',
+        organizationName: payload.organizationName,
       },
     });
+
+    await redis.del(`signup:${email}`);
 
     return {
       user: { id: user.id, email: user.email, role: user.role, organizationId: user.organization_id },
@@ -206,43 +195,39 @@ const verifyEmail = async ({ email, otp }) => {
  * @param {{ email: string }} params
  */
 const resendVerification = async ({ email }) => {
-  const user = await knex('users')
-    .where({ email, email_verified: false, status: 'active' })
-    .first();
+  const pendingStr = await redis.get(`signup:${email}`);
 
-  if (!user) {
+  if (!pendingStr) {
     // Silent success to prevent email enumeration
     return;
   }
+  
+  const ttl = await redis.ttl(`signup:${email}`);
 
   // Rate limit: don't resend if last OTP was sent < 2 minutes ago
-  if (user.verification_expires_at) {
-    const otpSentAt = new Date(user.verification_expires_at).getTime() - 15 * 60 * 1000;
-    const twoMinutesAgo = Date.now() - 2 * 60 * 1000;
-    if (otpSentAt > twoMinutesAgo) {
-      throw new AppError(
-        'Please wait before requesting a new verification code.',
-        'RATE_LIMITED',
-        429
-      );
-    }
+  // Max TTL is 900. If current TTL > 780 (900 - 120), then < 2 mins have passed.
+  if (ttl > 780) {
+    throw new AppError(
+      'Please wait before requesting a new verification code.',
+      'RATE_LIMITED',
+      429
+    );
   }
 
+  const payload = JSON.parse(pendingStr);
   const otp = generateOtp();
-  const otpHash = hashOtp(otp);
-  const verificationExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+  payload.otpHash = hashOtp(otp);
 
-  await knex('users')
-    .where({ id: user.id })
-    .update({
-      verification_otp: otpHash,
-      verification_expires_at: verificationExpiresAt,
-      updated_at: knex.fn.now(),
-    });
+  await redis.set(
+    `signup:${email}`,
+    JSON.stringify(payload),
+    'EX',
+    900 // reset 15 minutes
+  );
 
   await emailQueue.add('verification_otp', {
     type: 'verification_otp',
-    data: { email: user.email, otp, firstName: user.first_name },
+    data: { email: payload.email, otp, firstName: payload.firstName },
   });
 };
 
@@ -383,7 +368,6 @@ const acceptInvite = async ({ token, email, password }) => {
       .update({
         password_hash: passwordHash,
         status: 'active',
-        email_verified: true,
         invite_token_hash: null,
         invite_expires_at: null,
         last_login_at: trx.fn.now(),
