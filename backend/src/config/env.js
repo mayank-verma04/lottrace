@@ -23,6 +23,7 @@ const envSchema = z.object({
   RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required'),
   EMAIL_FROM: z.string().default('LotTrace <onboarding@resend.dev>'),
   DEV_EMAIL_OVERRIDE: z.string().email().optional(), // Redirect ALL emails to this address in dev
+  EMAIL_DRY_RUN: z.coerce.boolean().default(false), // skip Resend API entirely, just log
 
   // App
   NODE_ENV: z.enum(['development', 'staging', 'production']).default('development'),

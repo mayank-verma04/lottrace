@@ -17,6 +17,16 @@ const sendEmail = async ({ from, to, subject, html }) => {
       ? `[→ ${to}] ${subject}`
       : subject;
 
+    if (env.EMAIL_DRY_RUN) {
+      logger.info(
+        {
+          to: actualTo, subject: actualSubject, emailData: html
+        },
+        '📧 EMAIL_DRY_RUN — email NOT sent via Resend '
+      );
+      return { data: { id: `dryrun_${Date.now()}` } }; // shape matches real Resend response
+    }
+
     const result = await resend.emails.send({
       from: from || env.EMAIL_FROM,
       to: actualTo,
