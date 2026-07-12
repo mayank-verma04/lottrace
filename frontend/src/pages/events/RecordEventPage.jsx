@@ -54,6 +54,8 @@ export default function RecordEventPage() {
     eventDatetime: new Date().toISOString().slice(0, 16),
     notes: '',
     voidReason: '', // only used if amending
+    counterpartyName: '',
+    counterpartyLotCode: '',
   });
 
   const [inputs, setInputs] = useState([]);
@@ -63,12 +65,23 @@ export default function RecordEventPage() {
   useEffect(() => {
     if (amendEventId && amendEventData?.data) {
       const e = amendEventData.data;
+      let cp = {};
+      try {
+        if (e.counterparty_info) {
+          cp = typeof e.counterparty_info === 'string' ? JSON.parse(e.counterparty_info) : e.counterparty_info;
+        }
+      } catch (err) {
+        console.error('Failed to parse counterparty info', err);
+      }
+      
       setFormData({
         eventType: e.event_type,
         locationId: e.location_id || '',
         eventDatetime: new Date(e.event_datetime).toISOString().slice(0, 16),
         notes: e.notes || '',
         voidReason: '',
+        counterpartyName: cp.name || '',
+        counterpartyLotCode: cp.lotCode || '',
       });
       setInputs((e.inputs || []).map(i => ({ lotId: String(i.lot_id), quantity: i.quantity, uom: i.uom })));
       setOutputs((e.outputs || []).map(o => ({ lotId: String(o.lot_id), quantity: o.quantity, uom: o.uom })));
@@ -138,11 +151,23 @@ export default function RecordEventPage() {
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
+      let counterpartyInfo = undefined;
+      if (['receiving', 'shipping'].includes(formData.eventType)) {
+        if (formData.counterpartyName || formData.counterpartyLotCode) {
+          counterpartyInfo = {};
+          if (formData.counterpartyName) counterpartyInfo.name = formData.counterpartyName;
+          if (formData.counterpartyLotCode) counterpartyInfo.lotCode = formData.counterpartyLotCode;
+        }
+      }
+
       const payload = {
-        ...formData,
+        eventType: formData.eventType,
+        locationId: formData.locationId,
+        notes: formData.notes,
         eventDatetime: new Date(formData.eventDatetime).toISOString(),
         source: 'manual',
         kdePayload,
+        counterpartyInfo,
         inputs: SHOWS_INPUTS.includes(formData.eventType) ? inputs.filter((i) => i.lotId) : [],
         outputs: SHOWS_OUTPUTS.includes(formData.eventType) ? outputs.filter((o) => o.lotId) : [],
       };
@@ -344,6 +369,43 @@ export default function RecordEventPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Counterparty Information */}
+        {['receiving', 'shipping'].includes(formData.eventType) && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold">Counterparty Information</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="counterpartyName">
+                    {formData.eventType === 'receiving' ? 'Supplier Name *' : 'Customer Name *'}
+                  </Label>
+                  <Input
+                    id="counterpartyName"
+                    value={formData.counterpartyName}
+                    onChange={setInput('counterpartyName')}
+                    placeholder={formData.eventType === 'receiving' ? "e.g. Green Farms LLC" : "e.g. FreshMart Stores"}
+                    required
+                  />
+                </div>
+                
+                {formData.eventType === 'receiving' && (
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="counterpartyLotCode">Supplier Lot Code</Label>
+                    <Input
+                      id="counterpartyLotCode"
+                      value={formData.counterpartyLotCode}
+                      onChange={setInput('counterpartyLotCode')}
+                      placeholder="Lot code from supplier"
+                    />
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Input lots */}
         {SHOWS_INPUTS.includes(formData.eventType) && (
