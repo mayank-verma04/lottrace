@@ -132,7 +132,7 @@ const createImport = async ({ organizationId, userId, filename, storageKey, cteT
  */
 const listImports = async (organizationId, { page = 1, limit = 20, status, cteType }) => {
   let query = db('imports')
-    .where('organization_id', organizationId)
+    .where('imports.organization_id', organizationId)
     .leftJoin('users', 'imports.created_by', 'users.id')
     .select(
       'imports.*',
