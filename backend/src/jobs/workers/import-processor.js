@@ -17,10 +17,10 @@ const getAdvisoryLockId = (orgId) => Math.abs(crc32.str(orgId));
 
 // ─── Required columns per CTE type ─────────────────────────
 const REQUIRED_COLS = {
-  creation: ['traceability_lot_code', 'product_name', 'quantity', 'uom', 'location_name', 'event_datetime'],
-  receiving: ['traceability_lot_code', 'product_name', 'quantity', 'uom', 'location_name', 'event_datetime'],
-  shipping: ['traceability_lot_code', 'product_name', 'quantity', 'uom', 'location_name', 'event_datetime'],
-  transformation: ['output_lot_code', 'output_product_name', 'output_quantity', 'output_uom', 'location_name', 'event_datetime'],
+  creation: ['transaction_id', 'traceability_lot_code', 'product_name', 'quantity', 'uom', 'location_name', 'event_datetime'],
+  receiving: ['transaction_id', 'traceability_lot_code', 'product_name', 'quantity', 'uom', 'location_name', 'event_datetime'],
+  shipping: ['transaction_id', 'traceability_lot_code', 'product_name', 'quantity', 'uom', 'location_name', 'event_datetime'],
+  transformation: ['transaction_id', 'direction', 'traceability_lot_code', 'product_name', 'quantity', 'uom', 'location_name', 'event_datetime'],
 };
 
 /**
@@ -39,13 +39,12 @@ const validateRow = (row, cteType, rowNum) => {
   }
 
   // Validate quantity is numeric
-  const qtyField = cteType === 'transformation' ? 'output_quantity' : 'quantity';
-  const qtyVal = (row[qtyField] || '').trim();
+  const qtyVal = (row.quantity || '').trim();
   if (qtyVal && isNaN(Number(qtyVal))) {
-    errors.push(`Row ${rowNum}: '${qtyField}' must be a number, got '${qtyVal}'`);
+    errors.push(`Row ${rowNum}: 'quantity' must be a number, got '${qtyVal}'`);
   }
   if (qtyVal && Number(qtyVal) <= 0) {
-    errors.push(`Row ${rowNum}: '${qtyField}' must be positive`);
+    errors.push(`Row ${rowNum}: 'quantity' must be positive`);
   }
 
   // Validate event_datetime is a valid date
@@ -57,11 +56,11 @@ const validateRow = (row, cteType, rowNum) => {
     }
   }
 
-  // For transformation, validate input_lot_codes present
+  // For transformation, validate direction
   if (cteType === 'transformation') {
-    const inputs = (row.input_lot_codes || '').trim();
-    if (!inputs) {
-      errors.push(`Row ${rowNum}: Missing required field 'input_lot_codes'`);
+    const dir = (row.direction || '').trim().toLowerCase();
+    if (dir && dir !== 'input' && dir !== 'output') {
+      errors.push(`Row ${rowNum}: 'direction' must be 'input' or 'output', got '${dir}'`);
     }
   }
 
@@ -70,7 +69,6 @@ const validateRow = (row, cteType, rowNum) => {
 
 /**
  * Build a lookup cache for products and locations within an org.
- * Key: lowercase name, Value: DB row
  */
 const buildLookupCaches = async (organizationId) => {
   const products = await knex('products')
@@ -91,63 +89,96 @@ const buildLookupCaches = async (organizationId) => {
 };
 
 /**
- * Process a single creation/receiving/shipping row.
- * Creates lot (if needed) + event + event_lot_links inside given trx.
+ * Process a grouped event. 
+ * Group is an array of { row, rowNum } sharing the same transaction_id.
  */
-const processStandardRow = async (trx, row, cteType, organizationId, userId, productMap, locationMap, prevHash) => {
-  const product = productMap.get((row.product_name || '').toLowerCase().trim());
-  if (!product) throw new Error(`Product '${row.product_name}' not found`);
+const processEventGroup = async (trx, group, cteType, organizationId, userId, productMap, locationMap, prevHash) => {
+  const firstRow = group[0].row;
+  
+  // 1. Resolve Event Location
+  const location = locationMap.get((firstRow.location_name || '').toLowerCase().trim());
+  if (!location) throw new Error(`Location '${firstRow.location_name}' not found for transaction ${firstRow.transaction_id}`);
 
-  const location = locationMap.get((row.location_name || '').toLowerCase().trim());
-  if (!location) throw new Error(`Location '${row.location_name}' not found`);
-
-  const tlc = row.traceability_lot_code.trim();
-  const quantity = Number(row.quantity);
-  const uom = (row.uom || product.default_uom || 'kg').trim();
-
-  // Find or create lot
-  let lot = await trx('lots')
-    .where({
-      organization_id: organizationId,
-      product_id: product.id,
-      traceability_lot_code: tlc,
-    })
-    .whereNot('status', 'void')
-    .first();
-
-  if (!lot) {
-    [lot] = await trx('lots').insert({
-      id: uuidv4(),
-      organization_id: organizationId,
-      product_id: product.id,
-      traceability_lot_code: tlc,
-      quantity,
-      uom,
-      created_by: userId,
-    }).returning('*');
-  }
-
-  // Build event payload
+  // 2. Build Event Payload
   const counterpartyInfo = {};
-  if (row.counterparty_name) counterpartyInfo.name = row.counterparty_name.trim();
-  if (row.counterparty_lot_code) counterpartyInfo.lotCode = row.counterparty_lot_code.trim();
+  if (firstRow.counterparty_name) counterpartyInfo.name = firstRow.counterparty_name.trim();
+  if (firstRow.counterparty_lot_code) counterpartyInfo.lotCode = firstRow.counterparty_lot_code.trim();
   const hasCounterparty = Object.keys(counterpartyInfo).length > 0;
 
   const eventPayload = {
     eventType: cteType,
     locationId: location.id,
-    eventDatetime: new Date(row.event_datetime.trim()).toISOString(),
+    eventDatetime: new Date(firstRow.event_datetime.trim()).toISOString(),
     source: 'import',
     kdePayload: {},
     counterpartyInfo: hasCounterparty ? counterpartyInfo : null,
-    inputs: cteType === 'receiving' ? [{ lotId: lot.id, quantity, uom }] : null,
-    outputs: cteType !== 'receiving' ? [{ lotId: lot.id, quantity, uom }] : null,
+    inputs: [],
+    outputs: [],
   };
 
-  // For creation: lot is output. For receiving: lot is input. For shipping: lot is output.
-  const direction = cteType === 'receiving' ? 'input' : 'output';
-  const recordHash = computeEventHash(eventPayload, prevHash);
   const eventId = uuidv4();
+  const affectedLotIds = new Set();
+  const eventLotLinks = [];
+
+  // 3. Process each Lot in the group
+  for (const item of group) {
+    const { row } = item;
+    const product = productMap.get((row.product_name || '').toLowerCase().trim());
+    if (!product) throw new Error(`Product '${row.product_name}' not found in transaction ${firstRow.transaction_id}`);
+
+    const tlc = row.traceability_lot_code.trim();
+    const quantity = Number(row.quantity);
+    const uom = (row.uom || product.default_uom || 'kg').trim();
+
+    // Find or create lot
+    let lot = await trx('lots')
+      .where({
+        organization_id: organizationId,
+        product_id: product.id,
+        traceability_lot_code: tlc,
+      })
+      .whereNot('status', 'void')
+      .first();
+
+    if (!lot) {
+      [lot] = await trx('lots').insert({
+        id: uuidv4(),
+        organization_id: organizationId,
+        product_id: product.id,
+        traceability_lot_code: tlc,
+        quantity,
+        uom,
+        created_by: userId,
+      }).returning('*');
+    }
+
+    // Determine direction
+    let direction;
+    if (cteType === 'creation') direction = 'output';
+    else if (cteType === 'receiving') direction = 'input';
+    else if (cteType === 'shipping') direction = 'output';
+    else if (cteType === 'transformation') direction = row.direction.toLowerCase().trim();
+
+    eventLotLinks.push({
+      id: uuidv4(),
+      event_id: eventId,
+      lot_id: lot.id,
+      direction,
+      quantity,
+      uom,
+    });
+
+    if (direction === 'input') {
+      eventPayload.inputs.push({ lotId: lot.id, quantity, uom });
+    } else {
+      eventPayload.outputs.push({ lotId: lot.id, quantity, uom });
+    }
+
+    affectedLotIds.add(lot.id);
+  }
+
+  // 4. Compute Hash & Create Event
+  const recordHash = computeEventHash(eventPayload, prevHash);
 
   const [event] = await trx('events').insert({
     id: eventId,
@@ -155,146 +186,22 @@ const processStandardRow = async (trx, row, cteType, organizationId, userId, pro
     event_type: cteType,
     location_id: location.id,
     counterparty_info: hasCounterparty ? JSON.stringify(counterpartyInfo) : null,
-    event_datetime: new Date(row.event_datetime.trim()),
+    event_datetime: new Date(firstRow.event_datetime.trim()),
     recorded_by: userId,
     source: 'import',
     kde_payload: JSON.stringify({}),
-    notes: (row.notes || '').trim() || null,
+    notes: (firstRow.notes || '').trim() || null,
     record_hash: recordHash,
     prev_hash: prevHash,
     status: 'active',
   }).returning('*');
 
-  // Create event_lot_link
-  await trx('event_lot_links').insert({
-    id: uuidv4(),
-    event_id: eventId,
-    lot_id: lot.id,
-    direction,
-    quantity,
-    uom,
-  });
-
-  // Invalidate trace cache
-  try {
-    await invalidateTraceCache(organizationId, lot.id);
-  } catch (_) {
-    // Non-fatal — Redis might be down
+  // 5. Bulk insert links
+  if (eventLotLinks.length > 0) {
+    await trx('event_lot_links').insert(eventLotLinks);
   }
 
-  return event;
-};
-
-/**
- * Process a single transformation row.
- * Creates output lot + resolves input lots + creates event with N input links and 1 output link.
- */
-const processTransformationRow = async (trx, row, organizationId, userId, productMap, locationMap, prevHash) => {
-  const product = productMap.get((row.output_product_name || '').toLowerCase().trim());
-  if (!product) throw new Error(`Product '${row.output_product_name}' not found`);
-
-  const location = locationMap.get((row.location_name || '').toLowerCase().trim());
-  if (!location) throw new Error(`Location '${row.location_name}' not found`);
-
-  const outputTlc = row.output_lot_code.trim();
-  const outputQty = Number(row.output_quantity);
-  const outputUom = (row.output_uom || product.default_uom || 'kg').trim();
-
-  // Find or create output lot
-  let outputLot = await trx('lots')
-    .where({
-      organization_id: organizationId,
-      product_id: product.id,
-      traceability_lot_code: outputTlc,
-    })
-    .whereNot('status', 'void')
-    .first();
-
-  if (!outputLot) {
-    [outputLot] = await trx('lots').insert({
-      id: uuidv4(),
-      organization_id: organizationId,
-      product_id: product.id,
-      traceability_lot_code: outputTlc,
-      quantity: outputQty,
-      uom: outputUom,
-      created_by: userId,
-    }).returning('*');
-  }
-
-  // Resolve input lots by TLC
-  const inputTlcs = row.input_lot_codes.split(',').map(s => s.trim()).filter(Boolean);
-  if (inputTlcs.length === 0) throw new Error('No input_lot_codes provided');
-
-  const inputLots = await trx('lots')
-    .where({ organization_id: organizationId })
-    .whereIn('traceability_lot_code', inputTlcs)
-    .whereNot('status', 'void');
-
-  if (inputLots.length !== inputTlcs.length) {
-    const found = inputLots.map(l => l.traceability_lot_code);
-    const missing = inputTlcs.filter(t => !found.includes(t));
-    throw new Error(`Input lots not found: ${missing.join(', ')}`);
-  }
-
-  // Build event payload
-  const inputs = inputLots.map(l => ({ lotId: l.id, quantity: Number(l.quantity), uom: l.uom }));
-  const outputs = [{ lotId: outputLot.id, quantity: outputQty, uom: outputUom }];
-
-  const eventPayload = {
-    eventType: 'transformation',
-    locationId: location.id,
-    eventDatetime: new Date(row.event_datetime.trim()).toISOString(),
-    source: 'import',
-    kdePayload: {},
-    counterpartyInfo: null,
-    inputs,
-    outputs,
-  };
-
-  const recordHash = computeEventHash(eventPayload, prevHash);
-  const eventId = uuidv4();
-
-  const [event] = await trx('events').insert({
-    id: eventId,
-    organization_id: organizationId,
-    event_type: 'transformation',
-    location_id: location.id,
-    event_datetime: new Date(row.event_datetime.trim()),
-    recorded_by: userId,
-    source: 'import',
-    kde_payload: JSON.stringify({}),
-    notes: (row.notes || '').trim() || null,
-    record_hash: recordHash,
-    prev_hash: prevHash,
-    status: 'active',
-  }).returning('*');
-
-  // Create event_lot_links: inputs + output
-  const links = [];
-  for (const inputLot of inputLots) {
-    links.push({
-      id: uuidv4(),
-      event_id: eventId,
-      lot_id: inputLot.id,
-      direction: 'input',
-      quantity: Number(inputLot.quantity),
-      uom: inputLot.uom,
-    });
-  }
-  links.push({
-    id: uuidv4(),
-    event_id: eventId,
-    lot_id: outputLot.id,
-    direction: 'output',
-    quantity: outputQty,
-    uom: outputUom,
-  });
-
-  await trx('event_lot_links').insert(links);
-
-  // Invalidate trace cache for all affected lots
-  const affectedLotIds = [...new Set(links.map(l => l.lot_id))];
+  // 6. Invalidate cache
   for (const lid of affectedLotIds) {
     try { await invalidateTraceCache(organizationId, lid); } catch (_) { /* non-fatal */ }
   }
@@ -352,9 +259,9 @@ const importWorker = new Worker(
       // 3. Build lookup caches
       const { productMap, locationMap } = await buildLookupCaches(organizationId);
 
-      // 4. Validate all rows upfront
-      const validatedRows = [];
+      // 4. Validate all rows upfront and group by transaction_id
       const allErrors = [];
+      const transactionGroups = new Map();
 
       rows.forEach((row, idx) => {
         const rowNum = idx + 2; // +2: 1-indexed + header row
@@ -362,15 +269,35 @@ const importWorker = new Worker(
         if (rowErrors.length > 0) {
           allErrors.push(...rowErrors.map(msg => ({ row: rowNum, message: msg })));
         } else {
-          validatedRows.push({ row, rowNum });
+          const trxId = row.transaction_id.trim();
+          if (!transactionGroups.has(trxId)) {
+            transactionGroups.set(trxId, []);
+          }
+          transactionGroups.get(trxId).push({ row, rowNum });
         }
       });
 
-      // 5. Process valid rows — each in its own transaction for isolation
-      let validCount = 0;
-      const lockId = getAdvisoryLockId(organizationId);
+      // Additional Validation: Transformations must have inputs and outputs
+      if (cteType === 'transformation') {
+        for (const [trxId, group] of transactionGroups.entries()) {
+          const hasInput = group.some(item => item.row.direction.toLowerCase() === 'input');
+          const hasOutput = group.some(item => item.row.direction.toLowerCase() === 'output');
+          if (!hasInput || !hasOutput) {
+            allErrors.push({ 
+              row: group[0].rowNum, 
+              message: `Transaction ${trxId} must have at least one 'input' row and one 'output' row for Transformation.` 
+            });
+            transactionGroups.delete(trxId);
+          }
+        }
+      }
 
-      for (const { row, rowNum } of validatedRows) {
+      // 5. Process valid groups — each in its own transaction for isolation
+      let validGroupsCount = 0;
+      const lockId = getAdvisoryLockId(organizationId);
+      const groupEntries = Array.from(transactionGroups.entries());
+
+      for (const [trxId, group] of groupEntries) {
         try {
           await knex.transaction(async (trx) => {
             // Acquire advisory lock for hash chain consistency
@@ -383,20 +310,19 @@ const importWorker = new Worker(
               .first();
             const prevHash = prevEvent ? prevEvent.record_hash : 'GENESIS';
 
-            if (cteType === 'transformation') {
-              await processTransformationRow(trx, row, organizationId, userId, productMap, locationMap, prevHash);
-            } else {
-              await processStandardRow(trx, row, cteType, organizationId, userId, productMap, locationMap, prevHash);
-            }
+            await processEventGroup(trx, group, cteType, organizationId, userId, productMap, locationMap, prevHash);
           });
 
-          validCount++;
+          validGroupsCount += group.length; // Count rows processed
         } catch (err) {
-          allErrors.push({ row: rowNum, message: err.message });
+          // If a group fails, all its rows fail
+          group.forEach(item => {
+            allErrors.push({ row: item.rowNum, message: `Transaction ${trxId} Failed: ${err.message}` });
+          });
         }
 
         // Update job progress
-        const processed = validCount + allErrors.length;
+        const processed = validGroupsCount + allErrors.length;
         await job.updateProgress(Math.round((processed / rows.length) * 100));
       }
 
@@ -414,7 +340,7 @@ const importWorker = new Worker(
       // 7. Determine final status
       const errorCount = allErrors.length;
       let finalStatus;
-      if (validCount === 0 && errorCount > 0) {
+      if (validGroupsCount === 0 && errorCount > 0) {
         finalStatus = 'failed';
       } else if (errorCount > 0) {
         finalStatus = 'complete_with_errors';
@@ -426,7 +352,7 @@ const importWorker = new Worker(
       await knex('imports').where('id', importId).update({
         status: finalStatus,
         total_rows: rows.length,
-        valid_rows: validCount,
+        valid_rows: validGroupsCount,
         error_rows: errorCount,
         error_report_key: errorReportKey,
         completed_at: knex.fn.now(),
@@ -444,7 +370,7 @@ const importWorker = new Worker(
           user_id: userId,
           type: 'import_complete',
           title: 'Import ' + statusLabel,
-          message: `Your ${cteType} CSV import "${job.data.storageKey.split('/').pop()}" ${statusLabel}. ${validCount} rows imported, ${errorCount} errors.`,
+          message: `Your ${cteType} CSV import "${job.data.storageKey.split('/').pop()}" ${statusLabel}. ${validGroupsCount} rows imported, ${errorCount} errors.`,
           link: `/imports`,
           entity_type: 'import',
           entity_id: importId,
@@ -453,8 +379,8 @@ const importWorker = new Worker(
         logger.warn({ err: notifErr }, 'Failed to create import notification');
       }
 
-      logger.info({ importId, finalStatus, validCount, errorCount }, 'Import processing complete');
-      return { status: finalStatus, validCount, errorCount };
+      logger.info({ importId, finalStatus, validGroupsCount, errorCount }, 'Import processing complete');
+      return { status: finalStatus, validCount: validGroupsCount, errorCount };
 
     } catch (err) {
       logger.error({ err, importId }, 'Import processing failed');

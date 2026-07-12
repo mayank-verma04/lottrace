@@ -9,89 +9,137 @@ const { stringify } = require('csv-stringify/sync');
 // ─── CSV Template Columns per CTE Type ──────────────────────
 const TEMPLATE_COLUMNS = {
   creation: [
+    'transaction_id',
+    'event_datetime',
+    'location_name',
+    'notes',
     'traceability_lot_code',
     'product_name',
     'quantity',
     'uom',
-    'location_name',
-    'event_datetime',
-    'notes',
   ],
   receiving: [
+    'transaction_id',
+    'event_datetime',
+    'location_name',
+    'counterparty_name',
+    'notes',
     'traceability_lot_code',
     'product_name',
     'quantity',
     'uom',
-    'location_name',
-    'event_datetime',
-    'counterparty_name',
     'counterparty_lot_code',
-    'notes',
   ],
   shipping: [
+    'transaction_id',
+    'event_datetime',
+    'location_name',
+    'counterparty_name',
+    'notes',
     'traceability_lot_code',
     'product_name',
     'quantity',
     'uom',
-    'location_name',
-    'event_datetime',
-    'counterparty_name',
-    'notes',
   ],
   transformation: [
-    'output_lot_code',
-    'output_product_name',
-    'output_quantity',
-    'output_uom',
-    'input_lot_codes',
-    'location_name',
+    'transaction_id',
     'event_datetime',
+    'location_name',
     'notes',
+    'direction',
+    'traceability_lot_code',
+    'product_name',
+    'quantity',
+    'uom',
   ],
 };
 
 // ─── Example rows per CTE Type (for template download) ──────
 const TEMPLATE_EXAMPLES = {
-  creation: {
-    traceability_lot_code: 'LOT-2024-001',
-    product_name: 'Organic Spinach',
-    quantity: '500',
-    uom: 'kg',
-    location_name: 'Main Farm',
-    event_datetime: '2024-06-15T08:00:00.000Z',
-    notes: 'Morning harvest',
-  },
-  receiving: {
-    traceability_lot_code: 'LOT-2024-002',
-    product_name: 'Organic Spinach',
-    quantity: '480',
-    uom: 'kg',
-    location_name: 'Processing Plant',
-    event_datetime: '2024-06-16T10:30:00.000Z',
-    counterparty_name: 'Green Farms LLC',
-    counterparty_lot_code: 'GF-LOT-887',
-    notes: 'Received via refrigerated truck',
-  },
-  shipping: {
-    traceability_lot_code: 'LOT-2024-003',
-    product_name: 'Bagged Spinach 1lb',
-    quantity: '200',
-    uom: 'units',
-    location_name: 'Distribution Center',
-    event_datetime: '2024-06-17T14:00:00.000Z',
-    counterparty_name: 'FreshMart Stores',
-    notes: 'Shipped to East region',
-  },
-  transformation: {
-    output_lot_code: 'LOT-2024-004',
-    output_product_name: 'Bagged Spinach 1lb',
-    output_quantity: '200',
-    output_uom: 'units',
-    input_lot_codes: 'LOT-2024-001,LOT-2024-002',
-    location_name: 'Processing Plant',
-    event_datetime: '2024-06-16T15:00:00.000Z',
-    notes: 'Washed and packaged',
-  },
+  creation: [
+    {
+      transaction_id: 'TRX-001',
+      event_datetime: '2024-06-15T08:00:00.000Z',
+      location_name: 'Main Farm',
+      notes: 'Morning harvest',
+      traceability_lot_code: 'LOT-2024-001',
+      product_name: 'Organic Spinach',
+      quantity: '500',
+      uom: 'kg',
+    },
+    {
+      transaction_id: 'TRX-001',
+      event_datetime: '2024-06-15T08:00:00.000Z',
+      location_name: 'Main Farm',
+      notes: 'Morning harvest',
+      traceability_lot_code: 'LOT-2024-002',
+      product_name: 'Organic Kale',
+      quantity: '300',
+      uom: 'kg',
+    }
+  ],
+  receiving: [
+    {
+      transaction_id: 'TRX-002',
+      event_datetime: '2024-06-16T10:30:00.000Z',
+      location_name: 'Processing Plant',
+      counterparty_name: 'Green Farms LLC',
+      notes: 'Received via refrigerated truck',
+      traceability_lot_code: 'LOT-2024-003',
+      product_name: 'Organic Spinach',
+      quantity: '480',
+      uom: 'kg',
+      counterparty_lot_code: 'GF-LOT-887',
+    }
+  ],
+  shipping: [
+    {
+      transaction_id: 'TRX-003',
+      event_datetime: '2024-06-17T14:00:00.000Z',
+      location_name: 'Distribution Center',
+      counterparty_name: 'FreshMart Stores',
+      notes: 'Shipped to East region',
+      traceability_lot_code: 'LOT-2024-004',
+      product_name: 'Bagged Spinach 1lb',
+      quantity: '200',
+      uom: 'units',
+    }
+  ],
+  transformation: [
+    {
+      transaction_id: 'TRX-004',
+      event_datetime: '2024-06-16T15:00:00.000Z',
+      location_name: 'Processing Plant',
+      notes: 'Washed and packaged',
+      direction: 'input',
+      traceability_lot_code: 'LOT-2024-001',
+      product_name: 'Organic Spinach',
+      quantity: '250',
+      uom: 'kg',
+    },
+    {
+      transaction_id: 'TRX-004',
+      event_datetime: '2024-06-16T15:00:00.000Z',
+      location_name: 'Processing Plant',
+      notes: 'Washed and packaged',
+      direction: 'input',
+      traceability_lot_code: 'LOT-2024-002',
+      product_name: 'Organic Kale',
+      quantity: '100',
+      uom: 'kg',
+    },
+    {
+      transaction_id: 'TRX-004',
+      event_datetime: '2024-06-16T15:00:00.000Z',
+      location_name: 'Processing Plant',
+      notes: 'Washed and packaged',
+      direction: 'output',
+      traceability_lot_code: 'LOT-2024-005',
+      product_name: 'Mixed Greens 1lb',
+      quantity: '150',
+      uom: 'units',
+    }
+  ],
 };
 
 /**
@@ -227,10 +275,12 @@ const generateTemplate = (cteType) => {
     throw new AppError('Invalid CTE type for template', 'VALIDATION_ERROR', 422);
   }
 
-  const example = TEMPLATE_EXAMPLES[cteType];
-  const exampleRow = columns.map(col => example[col] || '');
+  const examples = TEMPLATE_EXAMPLES[cteType];
+  const exampleRows = examples.map(example => 
+    columns.map(col => example[col] || '')
+  );
 
-  return stringify([exampleRow], {
+  return stringify(exampleRows, {
     header: true,
     columns,
   });
