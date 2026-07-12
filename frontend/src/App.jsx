@@ -22,6 +22,7 @@ const VerifyEmailPage = lazy(() => import('./pages/auth/VerifyEmailPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const OrganizationPage = lazy(() => import('./pages/settings/OrganizationPage'));
 const UsersPage = lazy(() => import('./pages/settings/UsersPage'));
+const SettingsLayout = lazy(() => import('./pages/settings/SettingsLayout'));
 
 // Locations & Products
 const LocationsListPage = lazy(() => import('./pages/locations/LocationsListPage'));
@@ -86,8 +87,10 @@ function App() {
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/settings" element={<OrganizationPage />} />
-              <Route path="/settings/users" element={<UsersPage />} />
+              <Route path="/settings" element={<SettingsLayout />}>
+                <Route index element={<OrganizationPage />} />
+                <Route path="users" element={<UsersPage />} />
+              </Route>
               
               {/* Locations & Products */}
               <Route path="/locations" element={<LocationsListPage />} />

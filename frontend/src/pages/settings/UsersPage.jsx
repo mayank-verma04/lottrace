@@ -15,7 +15,7 @@ import {
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAuthStore } from '@/stores/auth.store';
 
-import { PageHeader } from '@/components/common/PageHeader';
+
 import { DataTable } from '@/components/common/DataTable';
 
 import { Button } from '@/components/ui/button';
@@ -242,83 +242,83 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Users"
-        subtitle="Manage users and roles in your organization."
-        action={
-          can('org_admin') && (
-            <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Invite User
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Invite User</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={inviteForm.handleSubmit(onInviteSubmit)} className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-medium">Users & Roles</h3>
+          <p className="text-sm text-muted-foreground">Manage users and roles in your organization.</p>
+        </div>
+        {can('org_admin') && (
+          <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Invite User
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Invite User</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={inviteForm.handleSubmit(onInviteSubmit)} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="inv-email">Email *</Label>
+                  <Input id="inv-email" {...inviteForm.register('email')} placeholder="user@example.com" type="email" />
+                  {inviteForm.formState.errors.email && (
+                    <p className="text-sm text-destructive">{inviteForm.formState.errors.email.message}</p>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="inv-email">Email *</Label>
-                    <Input id="inv-email" {...inviteForm.register('email')} placeholder="user@example.com" type="email" />
-                    {inviteForm.formState.errors.email && (
-                      <p className="text-sm text-destructive">{inviteForm.formState.errors.email.message}</p>
+                    <Label htmlFor="inv-first">First Name *</Label>
+                    <Input id="inv-first" {...inviteForm.register('firstName')} />
+                    {inviteForm.formState.errors.firstName && (
+                      <p className="text-sm text-destructive">{inviteForm.formState.errors.firstName.message}</p>
                     )}
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex flex-col gap-2">
-                      <Label htmlFor="inv-first">First Name *</Label>
-                      <Input id="inv-first" {...inviteForm.register('firstName')} />
-                      {inviteForm.formState.errors.firstName && (
-                        <p className="text-sm text-destructive">{inviteForm.formState.errors.firstName.message}</p>
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <Label htmlFor="inv-last">Last Name *</Label>
-                      <Input id="inv-last" {...inviteForm.register('lastName')} />
-                      {inviteForm.formState.errors.lastName && (
-                        <p className="text-sm text-destructive">{inviteForm.formState.errors.lastName.message}</p>
-                      )}
-                    </div>
-                  </div>
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="inv-role">Role *</Label>
-                    <Select
-                      defaultValue="operator"
-                      onValueChange={(v) => inviteForm.setValue('role', v)}
-                    >
-                      <SelectTrigger id="inv-role">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {VALID_ROLES.map((r) => (
-                          <SelectItem key={r} value={r}>{ROLE_LABELS[r]}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {inviteForm.formState.errors.role && (
-                      <p className="text-sm text-destructive">{inviteForm.formState.errors.role.message}</p>
+                    <Label htmlFor="inv-last">Last Name *</Label>
+                    <Input id="inv-last" {...inviteForm.register('lastName')} />
+                    {inviteForm.formState.errors.lastName && (
+                      <p className="text-sm text-destructive">{inviteForm.formState.errors.lastName.message}</p>
                     )}
                   </div>
-                  <div className="flex justify-end gap-2 pt-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => { setInviteOpen(false); inviteForm.reset(); }}
-                    >
-                      Cancel
-                    </Button>
-                    <Button type="submit" disabled={inviteMutation.isPending}>
-                      {inviteMutation.isPending ? 'Sending...' : 'Send Invite'}
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
-          )
-        }
-      />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="inv-role">Role *</Label>
+                  <Select
+                    defaultValue="operator"
+                    onValueChange={(v) => inviteForm.setValue('role', v)}
+                  >
+                    <SelectTrigger id="inv-role">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {VALID_ROLES.map((r) => (
+                        <SelectItem key={r} value={r}>{ROLE_LABELS[r]}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {inviteForm.formState.errors.role && (
+                    <p className="text-sm text-destructive">{inviteForm.formState.errors.role.message}</p>
+                  )}
+                </div>
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => { setInviteOpen(false); inviteForm.reset(); }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={inviteMutation.isPending}>
+                    {inviteMutation.isPending ? 'Sending...' : 'Send Invite'}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        )}
+      </div>
 
       {/* Edit Role Dialog */}
       <Dialog open={!!editRoleUser} onOpenChange={(open) => { if (!open) setEditRoleUser(null); }}>
