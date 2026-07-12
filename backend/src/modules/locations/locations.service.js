@@ -11,6 +11,25 @@ const { paginate } = require('../../utils/pagination');
  * @returns {Promise<Object>} Created location
  */
 const createLocation = async (data, organizationId, userId) => {
+  const existingLocations = await db('locations')
+    .where({ organization_id: organizationId, name: data.name });
+
+  if (existingLocations.length > 0) {
+    if (!data.gln && !data.addressLine1 && !data.city) {
+      throw new AppError('A location with this name already exists. Please provide a GLN, Address Line 1, or City to differentiate them.', 'VALIDATION_ERROR', 409);
+    }
+    
+    const exactMatch = existingLocations.find(loc => 
+      (loc.gln || null) === (data.gln || null) &&
+      (loc.address_line1 || null) === (data.addressLine1 || null) &&
+      (loc.city || null) === (data.city || null)
+    );
+
+    if (exactMatch) {
+      throw new AppError('A location with this exact name, GLN, Address, and City already exists.', 'VALIDATION_ERROR', 409);
+    }
+  }
+
   const [location] = await db('locations')
     .insert({
       id: uuid(),
@@ -119,6 +138,36 @@ const updateLocation = async (locationId, data, organizationId) => {
 
   if (Object.keys(updateData).length === 0) {
     throw new AppError('No fields to update', 'VALIDATION_ERROR', 422);
+  }
+
+  if (data.name !== undefined || data.gln !== undefined || data.addressLine1 !== undefined || data.city !== undefined) {
+    const current = await db('locations').where({ id: locationId, organization_id: organizationId }).first();
+    if (!current) throw new AppError('Location not found', 'NOT_FOUND', 404);
+
+    const newName = data.name !== undefined ? data.name : current.name;
+    const newGln = data.gln !== undefined ? data.gln : current.gln;
+    const newAddressLine1 = data.addressLine1 !== undefined ? data.addressLine1 : current.address_line1;
+    const newCity = data.city !== undefined ? data.city : current.city;
+
+    const existingLocations = await db('locations')
+      .where({ organization_id: organizationId, name: newName })
+      .whereNot({ id: locationId });
+
+    if (existingLocations.length > 0) {
+      if (!newGln && !newAddressLine1 && !newCity) {
+        throw new AppError('A location with this name already exists. Please provide a GLN, Address Line 1, or City to differentiate them.', 'VALIDATION_ERROR', 409);
+      }
+      
+      const exactMatch = existingLocations.find(loc => 
+        (loc.gln || null) === (newGln || null) &&
+        (loc.address_line1 || null) === (newAddressLine1 || null) &&
+        (loc.city || null) === (newCity || null)
+      );
+
+      if (exactMatch) {
+        throw new AppError('A location with this exact name, GLN, Address, and City already exists.', 'VALIDATION_ERROR', 409);
+      }
+    }
   }
 
   updateData.updated_at = db.fn.now();
