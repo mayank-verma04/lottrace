@@ -11,6 +11,21 @@ const { paginate } = require('../../utils/pagination');
  * @returns {Promise<Object>}
  */
 const createProduct = async (data, organizationId, userId) => {
+  // Check for uniqueness based on name and SKU
+  const existingProducts = await db('products')
+    .where({ organization_id: organizationId, name: data.name });
+
+  if (existingProducts.length > 0) {
+    if (!data.sku) {
+      throw new AppError('A product with this name already exists. Please provide a unique SKU to differentiate them.', 'VALIDATION_ERROR', 409);
+    }
+    
+    const exactMatch = existingProducts.find(p => p.sku === data.sku);
+    if (exactMatch) {
+      throw new AppError('A product with this name and SKU already exists.', 'VALIDATION_ERROR', 409);
+    }
+  }
+
   const [product] = await db('products')
     .insert({
       id: uuid(),
@@ -109,6 +124,29 @@ const updateProduct = async (productId, data, organizationId) => {
 
   if (Object.keys(updateData).length === 0) {
     throw new AppError('No fields to update', 'VALIDATION_ERROR', 422);
+  }
+
+  if (data.name !== undefined || data.sku !== undefined) {
+    const current = await db('products').where({ id: productId, organization_id: organizationId }).first();
+    if (!current) throw new AppError('Product not found', 'NOT_FOUND', 404);
+
+    const newName = data.name !== undefined ? data.name : current.name;
+    const newSku = data.sku !== undefined ? data.sku : current.sku;
+
+    const existingProducts = await db('products')
+      .where({ organization_id: organizationId, name: newName })
+      .whereNot({ id: productId });
+
+    if (existingProducts.length > 0) {
+      if (!newSku) {
+        throw new AppError('A product with this name already exists. Please provide a unique SKU to differentiate them.', 'VALIDATION_ERROR', 409);
+      }
+      
+      const exactMatch = existingProducts.find(p => p.sku === newSku);
+      if (exactMatch) {
+        throw new AppError('A product with this name and SKU already exists.', 'VALIDATION_ERROR', 409);
+      }
+    }
   }
 
   updateData.updated_at = db.fn.now();
