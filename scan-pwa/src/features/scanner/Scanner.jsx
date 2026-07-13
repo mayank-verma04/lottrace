@@ -20,19 +20,30 @@ export const Scanner = ({ onScan, onError }) => {
     // Create the reader inside the effect so it's fully owned by this lifecycle.
     const reader = new BrowserMultiFormatReader();
 
-    // ZXing internally calls console.warn for every NotFoundException (every frame
-    // with no barcode). Patch it out for the lifetime of this scanner to prevent
-    // DevTools memory bloat and eventual browser crash.
-    const originalWarn = console.warn;
-    console.warn = (...args) => {
+    // ZXing emits noise on EVERY frame where no barcode is found — both via
+    // console.warn AND console.error ("MultiFormatReader: non-ReaderException …").
+    // Patch both for the scanner's lifetime to prevent DevTools memory bloat and
+    // the resulting browser hang/unresponsiveness.
+    const ZXING_NOISE_PATTERNS = ['NotFoundException', 'non-ReaderException'];
+    const isZxingNoise = (args) => {
       const msg = args[0];
-      if (
+      return (
         typeof msg === 'string' &&
-        (msg.includes('NotFoundException') || msg.includes('non-ReaderException'))
-      ) {
-        return; // swallow silently — this is normal "no barcode found" noise
-      }
+        ZXING_NOISE_PATTERNS.some((p) => msg.includes(p))
+      );
+    };
+
+    const originalWarn = console.warn;
+    const originalError = console.error;
+
+    console.warn = (...args) => {
+      if (isZxingNoise(args)) return;
       originalWarn.apply(console, args);
+    };
+
+    console.error = (...args) => {
+      if (isZxingNoise(args)) return;
+      originalError.apply(console, args);
     };
 
     const startScanner = async () => {
@@ -78,8 +89,9 @@ export const Scanner = ({ onScan, onError }) => {
     startScanner();
 
     return () => {
-      // Restore original console.warn before teardown
+      // Restore both patched console methods before teardown
       console.warn = originalWarn;
+      console.error = originalError;
       try {
         reader.reset();
       } catch (_) {
