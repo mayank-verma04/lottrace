@@ -21,6 +21,12 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const original = error.config;
+    
+    // Do not intercept 401s for login or refresh itself
+    if (original.url.includes('/auth/login') || original.url.includes('/auth/refresh')) {
+      return Promise.reject(error);
+    }
+
     if (error.response?.status === 401 && !original._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => queue.push({ resolve, reject }))
