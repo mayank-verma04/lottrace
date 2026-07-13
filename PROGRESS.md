@@ -1,9 +1,9 @@
 # LotTrace — Build Progress
 
 ## Current Status
-**Phase:** Phase 1 — Trace Core / MVP (Complete)
-**Last Updated:** 2026-07-02
-**Last Session:** Invite User flow — end-to-end fix (accept-invite endpoint, resend/cancel, UI dialogs, audit logging, branded emails)
+**Phase:** Phase 2 — Field-Ready
+**Last Updated:** 2026-07-14
+**Last Session:**
 
 ---
 
@@ -12,177 +12,27 @@
 |-------|------|-------|--------|
 | 0 | Foundation | 1–3 | ✅ Complete |
 | 1 | Trace Core (MVP) | 4–9 | ✅ Complete |
-| 2 | Field-Ready | 10–14 | 🔲 Not Started |
+| 2 | Field-Ready | 10–14 | ✅ Complete |
 | 3 | Scale & Integrate | 15–20 | 🔲 Not Started |
 | 4 | Depth | 21+ | 🔲 Not Started |
 
 ---
 
 ## ✅ Completed
-- [x] Phase 2, Step 17 — Notification bell + list
-- [x] Phase 2, Step 18 — Idempotency key support on event creation
-- [x] Phase 2, Step 19 — Onboarding checklist UI
+- [x] Phase 0, All Steps
+- [x] Phase 1, All Steps
+- [x] Phase 2, All Steps
 
 ---
 
 ## 🔄 In Progress
-_Phase 3, Step 1 — DB migrations: api_keys, webhooks, subscriptions_
+_None_
 
 ---
 
-## 📋 Phase 0 — Next Up (in order)
+## 📋 Phase 3 — Next Up (in order)
+_Scale & Integrate (3.1 - 3.18)_
 
-### Phase 0: Project Foundation (Current)
-- [x] **Step 1: Monorepo Scaffold** (backend, frontend, scan-pwa, shared configs)
-- [x] Init monorepo with pnpm workspaces
-- [x] `backend/` — Express app scaffold (app.js, server.js, config/)
-- [x] `frontend/` — Vite React app scaffold
-- [x] `scan-pwa/` — Vite React PWA scaffold
-- [x] Docker Compose (postgres, redis)
-- [x] `.env.example` files for all services
-- [x] ESLint + Prettier config (shared)
-- [x] Husky pre-commit hooks
-
-### Step 2: Database Foundation
-- [x] Knex setup + knexfile.js
-- [x] Migration: organizations table
-- [x] Migration: users table
-- [x] Migration: roles/permissions
-- [x] Migration: refresh_tokens table
-- [x] Seed: default roles, super_admin user
-- [x] PostgreSQL RLS policies
-
-### Step 3: Auth Module (Backend)
-- [x] POST /api/v1/auth/register
-- [x] POST /api/v1/auth/login
-- [x] POST /api/v1/auth/refresh
-- [x] POST /api/v1/auth/logout
-- [x] POST /api/v1/auth/forgot-password
-- [x] POST /api/v1/auth/reset-password
-- [x] Auth middleware (JWT verify)
-- [x] RBAC middleware (role check)
-- [x] Tenant scope middleware
-
-### Step 4: Org & User Management (Backend)
-- [x] GET/PATCH /api/v1/organizations/me
-- [x] GET /api/v1/users (paginated, filterable)
-- [x] GET /api/v1/users/:userId
-- [x] POST /api/v1/users/invite
-- [x] PATCH /api/v1/users/:userId
-- [x] POST /api/v1/users/:userId/deactivate
-- [x] POST /api/v1/users/:userId/reactivate
-- [x] POST /api/v1/users/:userId/resend-invite
-- [x] POST /api/v1/auth/accept-invite (token-based account activation)
-- [x] Audit logging on invite/update/deactivate/reactivate/resend-invite routes
-- [x] Branded HTML email templates for invite + password reset
-- [x] Reusable pagination utility
-
-### Step 5: Auth UI + User Management UI (Frontend)
-- [x] Auth UI (login, register, forgot-password pages)
-- [x] User management UI (invite dialog, status badges, row-actions dropdown)
-- [x] Accept Invite page (`/accept-invite`) — activates account, auto-signs in to `/dashboard`
-- [x] Organization settings page
-
-### Step 6: Core Trace DB + Locations/Products (Phase 1 Start)
-- [x] Migration: locations table
-- [x] Migration: products table
-- [x] Migration: lots table
-- [x] Migration: events table (append-only, hash chain, generated column)
-- [x] Migration: event_lot_links table
-- [x] Migration: attachments table
-- [x] Migration: audit_log table
-- [x] RLS policies on all 7 new tables
-- [x] Locations CRUD API (list, create, get, update, deactivate)
-- [x] Products CRUD API (list, create, get, update)
-- [x] KDE schema validation (nested Zod for custom_kde_schema)
-- [x] Validate middleware upgraded (body + query + params)
-- [x] Locations frontend pages (list + detail + create dialog)
-- [x] Products frontend pages (list + detail + KDE schema builder)
-- [x] React Query hooks for locations + products
-- [x] Routes wired in App.jsx
-
-### Step 7: Lots CRUD (Phase 1 Continued)
-- [x] Lot CRUD API (list, create, get, update)
-- [x] Lot void (POST /lots/:id/void)
-- [x] Lots frontend pages (list + detail)
-- [x] React Query hooks for lots
-- [x] Routes wired in App.jsx
- 
-### Step 8: Events CTEs (Current)
- - [x] Event: Creation CTE
- - [x] Event: Receiving CTE
- - [x] Event: Transformation CTE (N inputs → M outputs)
- - [x] Event: Shipping CTE
- - [x] Event amend flow (supersedes_event_id)
- - [x] Event void flow
- - [x] Compliance gap detection on event save
- - [x] Hash chain: compute + store (record_hash, prev_hash)
- - [x] Audit log middleware (auditLogger.js)
- - [x] Record Event form (4 CTE types)
- - [x] Events API routes & React Query hooks
-
-### Step 9: Trace Engine
- - [x] Trace engine: forward trace (recursive CTE)
- - [x] Trace engine: backward trace (recursive CTE)
- - [x] Trace engine: full trace (forward + backward, deduplicated)
- - [x] Trace result caching (Redis, 5min TTL)
- - [x] Cache invalidation on event creation
- - [x] Trace API routes (GET /trace/:lotId/forward|backward|full)
- - [x] Trace React Query hooks
- - [x] Trace visualization page (table view + tree view)
- - [x] Routes wired in App.jsx
-
-### Step 10: Events List & Audit Log (Phase 1 Complete)
- - [x] Audit backend module (routes, controller, service, validation)
- - [x] GET /api/v1/audit endpoint with pagination and filtering
- - [x] Audit API React Query hooks
- - [x] AuditLogPage (DataTable with filters)
- - [x] EventsListPage (DataTable)
- - [x] Mount routes in App.jsx and backend app.js
-
-### Step 10.5: Phase 1 Final Polish
- - [x] Reports backend (GET compliance gaps, POST export csv)
- - [x] Jobs queue (BullMQ) & worker (export-generator)
- - [x] Storage util for AWS S3
- - [x] Attachment support in Events module
- - [x] ComplianceGapsPage UI
- - [x] CSV Export Button on Events and Audit logs
- - [x] Attachment upload on RecordEventPage
-
-### Step 11: Phase 2 Foundation & PWA Init
- - [x] DB migrations: imports, recall_simulations, notifications, idempotency_keys
- - [x] Scan PWA: camera scanning (@zxing/library)
- - [x] Scan PWA: scan → lookup lot → attach to event flow scaffold
- - [x] PWA manifest + service worker (vite-plugin-pwa)
-
-### Step 12: Scan PWA Features & Bulk Import API
- - [x] Scan PWA: bulk scan mode (sequential receiving)
- - [x] Scan PWA: GS1-128 parsing
- - [x] Scan PWA: create new lot from unknown scan
- - [x] Bulk CSV import API (POST /imports)
- - [x] Import background job (import-processor.js)
- - [x] ImportPage UI
-
-### Step 13: Recall API & Dashboard Stats
- - [x] Recall simulation API (POST /recall/simulations)
- - [x] Recall simulation storage + retrieval
- - [x] Dashboard stats endpoint (GET /dashboard/stats)
- - [x] Dashboard recent activity feed (GET /dashboard/activity)
-
-### Step 14: Recall Simulation UI
- - [x] Recall simulation page (list & run)
- - [x] Recall simulation detail page (trace results summary)
- - [x] Wired to App.jsx routes
-
-### Step 15: Dashboard UI
- - [x] Dashboard API hooks (stats + activity)
- - [x] Dashboard page with stats cards + chart
- - [x] Recharts added to frontend
- 
-### Step 16: Notifications & Alerts
- - [x] Backend notifications module (GET /notifications)
- - [x] NotificationBell UI and react-query hooks
- 
 ---
 
 ## 🚫 Blocked / Open Questions
@@ -204,21 +54,6 @@ _Phase 3, Step 1 — DB migrations: api_keys, webhooks, subscriptions_
 ---
 
 ## 🔗 Key Files Modified Last Session
-- `backend/src/modules/auth/auth.validation.js` — Added `acceptInviteSchema`
-- `backend/src/modules/auth/auth.service.js` — Added `acceptInvite` service
-- `backend/src/modules/auth/auth.controller.js` — Added `acceptInvite` controller
-- `backend/src/modules/auth/auth.routes.js` — Registered `POST /accept-invite`
-- `backend/src/modules/users/users.service.js` — Added `resendInvite` service
-- `backend/src/modules/users/users.controller.js` — Added `resendInvite` controller
-- `backend/src/modules/users/users.routes.js` — Added `resend-invite` route + `auditLogger` on all mutating routes
-- `backend/src/middleware/auditLogger.js` — Added `/invite` and `/resend-invite` path detection
-- `backend/src/utils/email.js` — Upgraded `sendInviteEmail` + `sendPasswordResetEmail` to branded HTML templates
-- `frontend/src/api/users.api.js` — New file: React Query hooks for users
-- `frontend/src/pages/auth/AcceptInvitePage.jsx` — New file: accept invite page
-- `frontend/src/pages/settings/UsersPage.jsx` — Full rewrite: invite dialog, status badges, row-actions dropdown
-- `frontend/src/App.jsx` — Added `/accept-invite` route
-- `bruno/Auth/Accept Invite.bru` — New Bruno collection file
-- `bruno/Users/Resend Invite.bru` — New Bruno collection file
 
 ---
 

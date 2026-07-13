@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Scanner } from '@/features/scanner/Scanner';
-import { CheckCircle, ListPlus, Send } from 'lucide-react';
 import { parseGS1 } from '@/utils/gs1Parser';
 import { Button } from '@/components/ui/button';
+import { api } from '@/lib/api';
+import { useGetLocations } from '@/api/locations.api';
+import { useCreateEvent } from '@/api/events.api';
 
 const SCAN_STATES = {
   IDLE:          'idle',
@@ -17,10 +19,17 @@ const SCAN_STATES = {
 
 export default function ScanPage() {
   const [scanState, setScanState] = useState(SCAN_STATES.SCANNING);
-  const [scannedCode, setScannedCode] = useState(null);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [scannedLot, setScannedLot] = useState(null); // stores { tlc, lotId, uom }
   const [isBulkMode, setIsBulkMode] = useState(false);
-  const [scannedItems, setScannedItems] = useState([]);
+  const [scannedItems, setScannedItems] = useState([]); // stores { tlc, parsed, lotId, uom }
+  
+  const { data: locationsData } = useGetLocations({ limit: 100 });
+  const { mutateAsync: createEvent } = useCreateEvent();
+  
+  const [eventData, setEventData] = useState({
+    locationId: '',
+    eventType: 'receiving'
+  });
 
   const showSuccessFeedback = () => {
     if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
@@ -31,38 +40,78 @@ export default function ScanPage() {
     }, 1500);
   };
 
-  const handleScan = (code) => {
+  const handleScan = async (code) => {
     if (navigator.vibrate) navigator.vibrate(50);
     const parsed = parseGS1(code);
     const lotCode = parsed.lotCode || parsed.raw;
     
     if (isBulkMode) {
-      if (!scannedItems.find(i => i.lotCode === lotCode)) {
-        setScannedItems(prev => [...prev, { lotCode, parsed }]);
-        if (navigator.vibrate) navigator.vibrate(100);
+      if (scannedItems.find(i => i.tlc === lotCode)) return;
+      
+      try {
+        const response = await api.get('/lots', { params: { traceabilityLotCode: lotCode, limit: 1 } });
+        const lot = response.data?.data?.[0];
+        if (lot) {
+          setScannedItems(prev => [...prev, { tlc: lotCode, parsed, lotId: lot.id, uom: lot.uom }]);
+          if (navigator.vibrate) navigator.vibrate(100);
+        } else {
+          toast?.error(`Lot ${lotCode} not found`);
+        }
+      } catch (err) {
+        console.error(err);
       }
       return;
     }
 
-    setScannedCode(lotCode);
     setScanState(SCAN_STATES.LOOKING_UP);
     
-    setTimeout(() => {
-      // Mock logic: 20% chance of "unknown lot" to simulate NOT_FOUND
-      if (Math.random() < 0.2) {
-        setScanState(SCAN_STATES.NOT_FOUND);
-      } else {
-        setScanState(SCAN_STATES.LOT_FOUND);
-      }
-    }, 500);
+    api.get('/lots', { params: { traceabilityLotCode: lotCode, limit: 1 } })
+      .then(response => {
+        const lot = response.data?.data?.[0];
+        if (lot) {
+          setScannedLot({ tlc: lotCode, lotId: lot.id, uom: lot.uom });
+          setScanState(SCAN_STATES.LOT_FOUND);
+        } else {
+          setScannedLot({ tlc: lotCode });
+          setScanState(SCAN_STATES.NOT_FOUND);
+        }
+      })
+      .catch(err => {
+        console.error('Scan lookup failed:', err);
+        setScanState(SCAN_STATES.ERROR);
+      });
+  };
+
+  const handleEventSubmit = async () => {
+    if (!eventData.locationId) {
+      toast?.error('Location is required');
+      return;
+    }
+    try {
+      const payload = {
+        eventType: eventData.eventType,
+        locationId: eventData.locationId,
+        eventDatetime: new Date().toISOString(),
+        source: 'scan',
+        inputs: isBulkMode 
+          ? scannedItems.map(item => ({ lotId: item.lotId, quantity: 1, uom: item.uom }))
+          : [{ lotId: scannedLot.lotId, quantity: 1, uom: scannedLot.uom }],
+        outputs: []
+      };
+      
+      await createEvent(payload);
+      showSuccessFeedback();
+      setScannedItems([]);
+      setScannedLot(null);
+    } catch (err) {
+      console.error(err);
+      setScanState(SCAN_STATES.ERROR);
+    }
   };
 
   const handleBulkSubmit = () => {
     if (scannedItems.length === 0) return;
     setScanState(SCAN_STATES.EVENT_FORM);
-    // For now, simulate success
-    showSuccessFeedback();
-    setScannedItems([]);
   };
 
   return (
@@ -113,6 +162,13 @@ export default function ScanPage() {
           </div>
         )}
 
+        {scanState === SCAN_STATES.ERROR && (
+          <div className="flex flex-col items-center justify-center h-full space-y-4">
+            <p className="text-red-500">Error looking up lot.</p>
+            <Button onClick={() => setScanState(SCAN_STATES.SCANNING)}>Try Again</Button>
+          </div>
+        )}
+
         {scanState === SCAN_STATES.NOT_FOUND && (
           <div className="space-y-6">
             <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
@@ -139,21 +195,18 @@ export default function ScanPage() {
         {scanState === SCAN_STATES.LOT_FOUND && (
           <div className="space-y-6">
             <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-              <h3 className="font-semibold text-green-800">Lot Found</h3>
-              <p className="font-mono text-lg mt-2">{scannedCode}</p>
+              <div className="flex items-center gap-3 text-green-800 font-medium mb-1">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                Lot Found
+              </div>
+              <div className="text-green-700 text-sm ml-8">TLC: {scannedLot?.tlc}</div>
             </div>
-            <Button 
-              className="w-full min-h-[44px]"
-              onClick={showSuccessFeedback}
-            >
-              Record Event
+
+            <Button onClick={() => setScanState(SCAN_STATES.EVENT_FORM)} className="w-full min-h-[44px]">
+              Record Event for this Lot
             </Button>
-            <Button 
-              variant="outline"
-              className="w-full min-h-[44px]"
-              onClick={() => setScanState(SCAN_STATES.SCANNING)}
-            >
-              Cancel
+            <Button variant="outline" onClick={() => setScanState(SCAN_STATES.SCANNING)} className="w-full min-h-[44px]">
+              Scan Another
             </Button>
           </div>
         )}
@@ -161,8 +214,34 @@ export default function ScanPage() {
         {scanState === SCAN_STATES.EVENT_FORM && (
           <div className="space-y-6 mt-4">
              <h3 className="font-semibold text-lg">Record Event</h3>
-             <p className="text-sm text-muted-foreground">Flow for creating event goes here.</p>
-             <Button onClick={showSuccessFeedback} className="w-full min-h-[44px]">Save Event</Button>
+             <div className="space-y-4">
+               <div>
+                 <label className="text-sm font-medium">Event Type</label>
+                 <select 
+                   className="w-full border rounded-md p-2 mt-1"
+                   value={eventData.eventType} 
+                   onChange={(e) => setEventData({...eventData, eventType: e.target.value})}
+                 >
+                   <option value="receiving">Receiving</option>
+                   <option value="shipping">Shipping</option>
+                 </select>
+               </div>
+               <div>
+                 <label className="text-sm font-medium">Location</label>
+                 <select 
+                   className="w-full border rounded-md p-2 mt-1"
+                   value={eventData.locationId}
+                   onChange={(e) => setEventData({...eventData, locationId: e.target.value})}
+                 >
+                   <option value="">Select Location...</option>
+                   {locationsData?.data?.map(loc => (
+                     <option key={loc.id} value={loc.id}>{loc.name}</option>
+                   ))}
+                 </select>
+               </div>
+             </div>
+             
+             <Button onClick={handleEventSubmit} className="w-full min-h-[44px]">Save Event</Button>
              <Button variant="outline" onClick={() => setScanState(SCAN_STATES.SCANNING)} className="w-full min-h-[44px]">Cancel</Button>
           </div>
         )}

@@ -92,7 +92,19 @@ const buildLookupCaches = async (organizationId) => {
  * Process a grouped event. 
  * Group is an array of { row, rowNum } sharing the same transaction_id.
  */
-const processEventGroup = async (trx, group, cteType, organizationId, userId, productMap, locationMap, prevHash) => {
+const processEventGroup = async (trx, group, trxId, cteType, organizationId, userId, productMap, locationMap, prevHash) => {
+  const idempotencyKey = `import_${organizationId}_${trxId}`;
+  
+  // Check idempotency
+  const existingEvent = await trx('events')
+    .where({ idempotency_key: idempotencyKey, organization_id: organizationId })
+    .first();
+    
+  if (existingEvent) {
+    // Already processed, skip quietly or log
+    return existingEvent;
+  }
+
   const firstRow = group[0].row;
   
   // 1. Resolve Event Location
@@ -194,6 +206,7 @@ const processEventGroup = async (trx, group, cteType, organizationId, userId, pr
     record_hash: recordHash,
     prev_hash: prevHash,
     status: 'active',
+    idempotency_key: idempotencyKey,
   }).returning('*');
 
   // 5. Bulk insert links
@@ -310,7 +323,7 @@ const importWorker = new Worker(
               .first();
             const prevHash = prevEvent ? prevEvent.record_hash : 'GENESIS';
 
-            await processEventGroup(trx, group, cteType, organizationId, userId, productMap, locationMap, prevHash);
+            await processEventGroup(trx, group, trxId, cteType, organizationId, userId, productMap, locationMap, prevHash);
           });
 
           validGroupsCount += group.length; // Count rows processed

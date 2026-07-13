@@ -21,6 +21,7 @@ const listLotsSchema = z.object({
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().positive().max(100).optional().default(20),
   productId: z.string().uuid().optional(),
+  traceabilityLotCode: z.string().max(255).optional(),
   status: z.enum(['active', 'recalled', 'void']).optional(),
   search: z.string().max(255).optional(),
   sort: z.enum(['traceabilityLotCode', 'createdAt', 'quantity', 'status']).optional().default('createdAt'),

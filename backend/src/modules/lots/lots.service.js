@@ -46,7 +46,7 @@ const createLot = async (data, organizationId, userId) => {
  * @returns {Promise<{ data: Array, pagination: Object }>}
  */
 const listLots = async (params, organizationId) => {
-  const { page, limit, productId, status, search, sort, order } = params;
+  const { page, limit, productId, status, search, sort, order, traceabilityLotCode } = params;
 
   const sortColumnMap = {
     traceabilityLotCode: 'lots.traceability_lot_code',
@@ -80,6 +80,9 @@ const listLots = async (params, organizationId) => {
   }
   if (status) {
     query = query.where('lots.status', status);
+  }
+  if (traceabilityLotCode) {
+    query = query.where('lots.traceability_lot_code', traceabilityLotCode);
   }
   if (search) {
     query = query.where(function () {
