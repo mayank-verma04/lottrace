@@ -120,13 +120,30 @@
 @layer base {
     * {
         @apply border-border outline-ring/50;
-    }
-
-    body {
-        @apply bg-background text-foreground;
+        -webkit-tap-highlight-color: transparent;
     }
 
     html {
         @apply font-sans;
+        /* Prevent bounce scroll on iOS */
+        overscroll-behavior: none;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+        /* PWA safe area */
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        overscroll-behavior: none;
+    }
+
+    /* Prevent 300ms tap delay on mobile */
+    button, a, [role="button"] {
+        touch-action: manipulation;
+    }
+
+    /* Native select styling reset */
+    select {
+        @apply appearance-none;
     }
 }

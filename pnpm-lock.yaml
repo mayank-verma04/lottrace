@@ -21,7 +21,7 @@ importers:
         version: 0.31.2
       axios:
         specifier: ^1.7.2
-        version: 1.18.1
+        version: 1.18.1(supports-color@5.5.0)
       bullmq:
         specifier: ^5.79.1
         version: 5.79.1(supports-color@5.5.0)
@@ -136,7 +136,7 @@ importers:
         version: 8.21.3(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       axios:
         specifier: ^1.18.1
-        version: 1.18.1
+        version: 1.18.1(supports-color@5.5.0)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -219,6 +219,9 @@ importers:
       '@fontsource-variable/geist':
         specifier: ^5.2.9
         version: 5.2.9
+      '@hookform/resolvers':
+        specifier: ^5.4.0
+        version: 5.4.0(react-hook-form@7.80.0(react@19.2.7))
       '@shadcn/react':
         specifier: ^0.2.1
         version: 0.2.1(@types/react@19.2.17)(react@19.2.7)
@@ -230,7 +233,7 @@ importers:
         version: 0.23.0
       axios:
         specifier: ^1.18.1
-        version: 1.18.1
+        version: 1.18.1(supports-color@5.5.0)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -267,6 +270,9 @@ importers:
       react-dom:
         specifier: ^19.2.7
         version: 19.2.7(react@19.2.7)
+      react-hook-form:
+        specifier: ^7.80.0
+        version: 7.80.0(react@19.2.7)
       react-resizable-panels:
         specifier: ^4.12.1
         version: 4.12.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -278,7 +284,7 @@ importers:
         version: 3.8.0(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react-is@18.3.1)(react@19.2.7)(redux@5.0.1)
       shadcn:
         specifier: ^4.11.0
-        version: 4.11.0
+        version: 4.11.0(supports-color@5.5.0)
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -291,6 +297,9 @@ importers:
       vaul:
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
       zustand:
         specifier: ^5.0.14
         version: 5.0.14(@types/react@19.2.17)(immer@11.1.8)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7))
@@ -7617,7 +7626,7 @@ snapshots:
   '@mapbox/node-pre-gyp@1.0.11':
     dependencies:
       detect-libc: 2.1.2
-      https-proxy-agent: 5.0.1
+      https-proxy-agent: 5.0.1(supports-color@5.5.0)
       make-dir: 3.1.0
       node-fetch: 2.7.0
       nopt: 5.0.0
@@ -7630,28 +7639,6 @@ snapshots:
       - supports-color
 
   '@modelcontextprotocol/sdk@1.29.0(supports-color@5.5.0)(zod@3.25.76)':
-    dependencies:
-      '@hono/node-server': 1.19.14(hono@4.12.27)
-      ajv: 8.20.0
-      ajv-formats: 3.0.1(ajv@8.20.0)
-      content-type: 1.0.5
-      cors: 2.8.6
-      cross-spawn: 7.0.6
-      eventsource: 3.0.7
-      eventsource-parser: 3.1.0
-      express: 5.2.1(supports-color@5.5.0)
-      express-rate-limit: 8.5.2(express@5.2.1(supports-color@5.5.0))
-      hono: 4.12.27
-      jose: 6.2.3
-      json-schema-typed: 8.0.2
-      pkce-challenge: 5.0.1
-      raw-body: 3.0.2
-      zod: 3.25.76
-      zod-to-json-schema: 3.25.2(zod@3.25.76)
-    transitivePeerDependencies:
-      - supports-color
-
-  '@modelcontextprotocol/sdk@1.29.0(zod@3.25.76)':
     dependencies:
       '@hono/node-server': 1.19.14(hono@4.12.27)
       ajv: 8.20.0
@@ -8947,7 +8934,7 @@ snapshots:
 
   acorn@8.17.0: {}
 
-  agent-base@6.0.2:
+  agent-base@6.0.2(supports-color@5.5.0):
     dependencies:
       debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
@@ -9065,11 +9052,11 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.1.0
 
-  axios@1.18.1:
+  axios@1.18.1(supports-color@5.5.0):
     dependencies:
       follow-redirects: 1.16.0
       form-data: 4.0.6
-      https-proxy-agent: 5.0.1
+      https-proxy-agent: 5.0.1(supports-color@5.5.0)
       proxy-from-env: 2.1.0
     transitivePeerDependencies:
       - debug
@@ -9951,11 +9938,6 @@ snapshots:
       express: 4.22.2
       ip-address: 10.2.0
 
-  express-rate-limit@8.5.2(express@5.2.1(supports-color@5.5.0)):
-    dependencies:
-      express: 5.2.1(supports-color@5.5.0)
-      ip-address: 10.2.0
-
   express-rate-limit@8.5.2(express@5.2.1):
     dependencies:
       express: 5.2.1(supports-color@5.5.0)
@@ -10352,9 +10334,9 @@ snapshots:
       statuses: 2.0.2
       toidentifier: 1.0.1
 
-  https-proxy-agent@5.0.1:
+  https-proxy-agent@5.0.1(supports-color@5.5.0):
     dependencies:
-      agent-base: 6.0.2
+      agent-base: 6.0.2(supports-color@5.5.0)
       debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
@@ -12256,47 +12238,6 @@ snapshots:
       es-object-atoms: 1.1.2
 
   setprototypeof@1.2.0: {}
-
-  shadcn@4.11.0:
-    dependencies:
-      '@babel/core': 7.29.7
-      '@babel/parser': 7.29.7
-      '@babel/plugin-transform-typescript': 7.29.7(@babel/core@7.29.7)
-      '@babel/preset-typescript': 7.29.7(@babel/core@7.29.7)
-      '@dotenvx/dotenvx': 1.75.1
-      '@modelcontextprotocol/sdk': 1.29.0(zod@3.25.76)
-      '@types/validate-npm-package-name': 4.0.2
-      browserslist: 4.28.4
-      commander: 14.0.3
-      cosmiconfig: 9.0.2
-      dedent: 1.7.2
-      deepmerge: 4.3.1
-      diff: 8.0.4
-      execa: 9.6.1
-      fast-glob: 3.3.3
-      fs-extra: 11.3.5
-      fuzzysort: 3.1.0
-      https-proxy-agent: 7.0.6(supports-color@5.5.0)
-      kleur: 4.1.5
-      node-fetch: 3.3.2
-      open: 11.0.0
-      ora: 8.2.0
-      postcss: 8.5.15
-      postcss-selector-parser: 7.1.4
-      prompts: 2.4.2
-      recast: 0.23.11
-      stringify-object: 5.0.0
-      tailwind-merge: 3.6.0
-      ts-morph: 26.0.0
-      tsconfig-paths: 4.2.0
-      validate-npm-package-name: 7.0.2
-      zod: 3.25.76
-      zod-to-json-schema: 3.25.2(zod@3.25.76)
-    transitivePeerDependencies:
-      - '@cfworker/json-schema'
-      - babel-plugin-macros
-      - supports-color
-      - typescript
 
   shadcn@4.11.0(supports-color@5.5.0):
     dependencies:

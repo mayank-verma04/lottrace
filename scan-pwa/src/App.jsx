@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { ScanLine, Clock, Keyboard } from 'lucide-react';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from '@/components/ui/sonner';
 import { queryClient } from './lib/queryClient';
 import { useAuthStore } from './stores/auth.store';
 import { useEffect } from 'react';
@@ -16,23 +17,26 @@ const SCAN_NAV = [
 
 function BottomNav() {
   const location = useLocation();
-  
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around items-center h-16 pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 z-20 flex h-16 items-center justify-around border-t bg-background pb-[env(safe-area-inset-bottom)]">
       {SCAN_NAV.map((item) => {
         const Icon = item.icon;
-        const isActive = location.pathname.startsWith(item.path) || (item.path === '/scan' && location.pathname === '/');
-        
+        const isActive =
+          location.pathname.startsWith(item.path) ||
+          (item.path === '/scan' && location.pathname === '/');
+
         return (
           <Link
             key={item.path}
             to={item.path}
-            className={`flex flex-col items-center justify-center w-full h-full min-h-[44px] ${
-              isActive ? 'text-blue-600' : 'text-gray-500'
-            }`}
+            className={[
+              'flex flex-col items-center justify-center w-full h-full min-h-[44px] gap-1 text-xs font-medium transition-colors',
+              isActive ? 'text-primary' : 'text-muted-foreground',
+            ].join(' ')}
           >
-            <Icon className="h-6 w-6 mb-1" />
-            <span className="text-xs font-medium">{item.label}</span>
+            <Icon className="size-5" />
+            <span>{item.label}</span>
           </Link>
         );
       })}
@@ -40,12 +44,89 @@ function BottomNav() {
   );
 }
 
+function AppHeader() {
+  const { user } = useAuthStore();
+  const { clearAuth } = useAuthStore();
+
+  const handleLogout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch {
+      // ignore
+    } finally {
+      clearAuth();
+    }
+  };
+
+  return (
+    <header className="sticky top-0 z-10 flex items-center justify-between border-b bg-background px-4 py-3 shadow-sm">
+      <h1 className="text-lg font-bold tracking-tight text-foreground">LotTrace</h1>
+      <div className="flex items-center gap-3">
+        <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <span className="inline-block size-2 rounded-full bg-emerald-500" />
+          Online
+        </span>
+        {user && (
+          <button
+            onClick={handleLogout}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Sign out
+          </button>
+        )}
+      </div>
+    </header>
+  );
+}
+
 const ProtectedRoute = ({ children }) => {
   const { user, isLoading } = useAuthStore();
-  if (isLoading) return <div className="p-4 text-center mt-10">Loading...</div>;
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="size-8 animate-spin rounded-full border-2 border-border border-t-primary" />
+          <p className="text-sm text-muted-foreground">Loading…</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!user) return <Navigate to="/login" replace />;
   return children;
 };
+
+function Layout() {
+  return (
+    <div className="flex flex-col min-h-screen bg-background pb-16">
+      <AppHeader />
+      <main className="flex-1 overflow-y-auto">
+        <Routes>
+          <Route path="/" element={<ProtectedRoute><ScanPage /></ProtectedRoute>} />
+          <Route path="/scan" element={<ProtectedRoute><ScanPage /></ProtectedRoute>} />
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute>
+                <div className="p-6 text-center text-muted-foreground mt-10">History coming soon</div>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manual"
+            element={
+              <ProtectedRoute>
+                <div className="p-6 text-center text-muted-foreground mt-10">Manual entry coming soon</div>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </main>
+      <BottomNav />
+    </div>
+  );
+}
 
 export default function App() {
   const { setAuth, clearAuth } = useAuthStore();
@@ -56,7 +137,7 @@ export default function App() {
         const { data } = await api.post('/auth/refresh');
         const { user, accessToken } = data.data;
         setAuth(user, accessToken);
-      } catch (error) {
+      } catch {
         clearAuth();
       }
     };
@@ -65,28 +146,12 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <Toaster position="top-center" richColors />
       <BrowserRouter>
-        <div className="flex flex-col min-h-screen bg-gray-50 pb-16">
-          <header className="bg-white border-b px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-10">
-            <h1 className="font-bold text-xl tracking-tight text-blue-600">LotTrace Scanner</h1>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <span className="inline-block w-2 h-2 rounded-full bg-green-500"></span>
-              Online
-            </div>
-          </header>
-
-          <main className="flex-1 overflow-y-auto">
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/" element={<ProtectedRoute><ScanPage /></ProtectedRoute>} />
-              <Route path="/scan" element={<ProtectedRoute><ScanPage /></ProtectedRoute>} />
-              <Route path="/history" element={<ProtectedRoute><div className="p-4 text-center text-muted-foreground mt-10">History coming soon</div></ProtectedRoute>} />
-              <Route path="/manual" element={<ProtectedRoute><div className="p-4 text-center text-muted-foreground mt-10">Manual entry coming soon</div></ProtectedRoute>} />
-            </Routes>
-          </main>
-          
-          <BottomNav />
-        </div>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/*" element={<Layout />} />
+        </Routes>
       </BrowserRouter>
     </QueryClientProvider>
   );
