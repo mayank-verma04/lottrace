@@ -224,4 +224,3 @@ _Phase 3, Step 1 — DB migrations: api_keys, webhooks, subscriptions_
 
 ## 📌 Known Technical Debt
 _Track items here as they're deferred_
-- `UsersPage.jsx` `can('org_admin')` check is slightly non-idiomatic vs. granular permission strings like `can('users.invite')` — works correctly today but worth aligning with other modules in a future cleanup session.

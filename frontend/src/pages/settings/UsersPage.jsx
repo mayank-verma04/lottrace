@@ -225,7 +225,7 @@ export default function UsersPage() {
       id: 'actions',
       header: '',
       cell: ({ row }) => {
-        if (!can('org_admin')) return null;
+        if (!can('users.manage')) return null;
         return (
           <UserActions
             user={row.original}
@@ -247,7 +247,7 @@ export default function UsersPage() {
           <h3 className="text-lg font-medium">Users & Roles</h3>
           <p className="text-sm text-muted-foreground">Manage users and roles in your organization.</p>
         </div>
-        {can('org_admin') && (
+        {can('users.manage') && (
           <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
             <DialogTrigger asChild>
               <Button>
