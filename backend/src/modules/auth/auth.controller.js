@@ -6,11 +6,11 @@ const isProduction = process.env.NODE_ENV === 'production';
 const setRefreshTokenCookie = (res, refreshToken) => {
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
-    // In production: secure + strict for maximum safety.
+    // In production: secure + none for cross-domain (Vercel -> Backend).
     // In dev: lax (not strict) so the cookie is sent from cross-origin
     // dev clients (scan-pwa on a different port/IP hitting the API).
     secure: isProduction,
-    sameSite: isProduction ? 'strict' : 'lax',
+    sameSite: isProduction ? 'none' : 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
@@ -60,7 +60,7 @@ const logout = async (req, res) => {
   res.clearCookie('refreshToken', {
     httpOnly: true,
     secure: isProduction,
-    sameSite: isProduction ? 'strict' : 'lax',
+    sameSite: isProduction ? 'none' : 'lax',
   });
   return apiResponse.success(res, null, 'Logged out successfully');
 };
