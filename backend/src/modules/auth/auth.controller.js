@@ -1,11 +1,16 @@
 const authService = require('./auth.service');
 const apiResponse = require('../../utils/apiResponse');
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const setRefreshTokenCookie = (res, refreshToken) => {
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    // In production: secure + strict for maximum safety.
+    // In dev: lax (not strict) so the cookie is sent from cross-origin
+    // dev clients (scan-pwa on a different port/IP hitting the API).
+    secure: isProduction,
+    sameSite: isProduction ? 'strict' : 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
@@ -54,8 +59,8 @@ const logout = async (req, res) => {
   }
   res.clearCookie('refreshToken', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: isProduction,
+    sameSite: isProduction ? 'strict' : 'lax',
   });
   return apiResponse.success(res, null, 'Logged out successfully');
 };
