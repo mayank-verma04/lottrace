@@ -43,24 +43,24 @@
 
 | # | Feature | Module | Status |
 |---|---------|--------|--------|
-| 1.1 | DB migrations: locations, products, lots, events, event_lot_links, attachments, audit_log | database | 🔲 |
-| 1.2 | RLS policies on all tenant tables | database | 🔲 |
-| 1.3 | Location CRUD API | locations | 🔲 |
-| 1.4 | External partner location support | locations | 🔲 |
-| 1.5 | Product CRUD API | products | 🔲 |
-| 1.6 | Product custom KDE schema builder (API) | products | 🔲 |
+| 1.1 | DB migrations: locations, products, lots, events, event_lot_links, attachments, audit_log | database | ✅ |
+| 1.2 | RLS policies on all tenant tables | database | ✅ |
+| 1.3 | Location CRUD API | locations | ✅ |
+| 1.4 | External partner location support | locations | ✅ |
+| 1.5 | Product CRUD API | products | ✅ |
+| 1.6 | Product custom KDE schema builder (API) | products | ✅ |
 | 1.7 | Lot CRUD API | lots | ✅ |
 | 1.8 | Lot void (POST /lots/:id/void) | lots | ✅ |
-| 1.9 | Event: Creation CTE | events | 🔲 |
-| 1.10 | Event: Receiving CTE | events | 🔲 |
-| 1.11 | Event: Transformation CTE (N inputs → M outputs) | events | 🔲 |
-| 1.12 | Event: Shipping CTE | events | 🔲 |
-| 1.13 | Event amend flow (supersedes_event_id) | events | 🔲 |
-| 1.14 | Event void flow | events | 🔲 |
-| 1.15 | Compliance gap detection on event save | events | 🔲 |
-| 1.16 | Hash chain: compute + store (record_hash, prev_hash) | audit | 🔲 |
-| 1.17 | Audit log middleware (auditLogger.js) | audit | 🔲 |
-| 1.18 | Audit log endpoint (GET /audit) | audit | 🔲 |
+| 1.9 | Event: Creation CTE | events | ✅ |
+| 1.10 | Event: Receiving CTE | events | ✅ |
+| 1.11 | Event: Transformation CTE (N inputs → M outputs) | events | ✅ |
+| 1.12 | Event: Shipping CTE | events | ✅ |
+| 1.13 | Event amend flow (supersedes_event_id) | events | ✅ |
+| 1.14 | Event void flow | events | ✅ |
+| 1.15 | Compliance gap detection on event save | events | ✅ |
+| 1.16 | Hash chain: compute + store (record_hash, prev_hash) | audit | ✅ |
+| 1.17 | Audit log middleware (auditLogger.js) | audit | ✅ |
+| 1.18 | Audit log endpoint (GET /audit) | audit | ✅ |
 | 1.19 | Trace engine: forward trace (recursive CTE) | trace | ✅ |
 | 1.20 | Trace engine: backward trace (recursive CTE) | trace | ✅ |
 | 1.21 | Trace engine: full trace (forward + backward) | trace | ✅ |
