@@ -4,6 +4,9 @@ const router = express.Router();
 const authController = require('./auth.controller');
 const authValidation = require('./auth.validation');
 const validate = require('../../middleware/validate');
+const { authLimiter } = require('../../middleware/rateLimiter');
+
+router.use(authLimiter);
 
 router.post('/register', validate(authValidation.registerSchema), authController.register);
 router.post('/login', validate(authValidation.loginSchema), authController.login);

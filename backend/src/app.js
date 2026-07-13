@@ -10,11 +10,12 @@ const logger = require('./utils/logger');
 const apiResponse = require('./utils/apiResponse');
 const requestId = require('./middleware/requestId');
 const errorHandler = require('./middleware/errorHandler');
+const { apiLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
 
 // ─── Global Middleware ─────────────────────────────────────
-// Order matters: requestId → cors → helmet → compression → logging → body parsing
+// Order matters: requestId → cors → helmet → compression → logging → body parsing → rate limiting
 
 // 1. Request ID (tracing)
 app.use(requestId);
@@ -34,6 +35,9 @@ app.use(helmet());
 
 // 4. Gzip compression
 app.use(compression());
+
+// 5. Rate limiting (global)
+app.use('/api', apiLimiter);
 
 // 5. HTTP request logging
 app.use(
