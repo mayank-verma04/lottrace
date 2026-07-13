@@ -4,6 +4,9 @@ import { useAuthStore } from '../stores/auth.store';
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL + '/api/v1',
   withCredentials: true, // for refresh token cookie
+  headers: {
+    'ngrok-skip-browser-warning': 'true',
+  },
 });
 
 // Request: inject access token
