@@ -8,34 +8,34 @@
 
 | # | Feature | Module | Status |
 |---|---------|--------|--------|
-| 0.1 | Monorepo scaffold (pnpm workspaces) | infra | 🔲 |
-| 0.2 | Docker Compose (postgres + redis) | infra | 🔲 |
-| 0.3 | ESLint + Prettier + Husky | infra | 🔲 |
-| 0.4 | Express app setup (app.js, middleware chain) | backend | 🔲 |
-| 0.5 | Knex setup + knexfile.js | database | 🔲 |
-| 0.6 | DB migrations: organizations, users, refresh_tokens | database | 🔲 |
-| 0.7 | Config: env.js (Zod validation), redis.js | backend | 🔲 |
-| 0.8 | Utilities: apiResponse.js, AppError.js, logger.js | backend | 🔲 |
-| 0.9 | Middleware: requestId, errorHandler, authenticate | backend | 🔲 |
-| 0.10 | Auth: register endpoint | auth | 🔲 |
-| 0.11 | Auth: login endpoint | auth | 🔲 |
-| 0.12 | Auth: refresh token endpoint | auth | 🔲 |
-| 0.13 | Auth: logout endpoint + Redis token blacklist | auth | 🔲 |
-| 0.14 | Auth: forgot-password + reset-password | auth | 🔲 |
-| 0.15 | Middleware: tenantScope.js + rbac.js | backend | 🔲 |
-| 0.16 | Org management endpoints (GET/PATCH /organizations/me) | organizations | 🔲 |
-| 0.17 | User invite flow (invite → email → accept) | users | 🔲 |
-| 0.18 | User CRUD (list, get, update, deactivate) | users | 🔲 |
-| 0.19 | Vite React scaffold (frontend + scan-pwa) | frontend | 🔲 |
-| 0.20 | shadcn/ui + Tailwind setup | frontend | 🔲 |
-| 0.21 | Axios instance (api.js) + React Query setup | frontend | 🔲 |
-| 0.22 | Auth Zustand store | frontend | 🔲 |
-| 0.23 | Login page | frontend | 🔲 |
-| 0.24 | Register page | frontend | 🔲 |
-| 0.25 | Forgot/reset password pages | frontend | 🔲 |
-| 0.26 | App layout (sidebar + routing) | frontend | 🔲 |
-| 0.27 | User management page | frontend | 🔲 |
-| 0.28 | Org settings page | frontend | 🔲 |
+| 0.1 | Monorepo scaffold (pnpm workspaces) | infra | ✅ |
+| 0.2 | Docker Compose (postgres + redis) | infra | ✅ |
+| 0.3 | ESLint + Prettier + Husky | infra | ✅ |
+| 0.4 | Express app setup (app.js, middleware chain) | backend | ✅ |
+| 0.5 | Knex setup + knexfile.js | database | ✅ |
+| 0.6 | DB migrations: organizations, users, refresh_tokens | database | ✅ |
+| 0.7 | Config: env.js (Zod validation), redis.js | backend | ✅ |
+| 0.8 | Utilities: apiResponse.js, AppError.js, logger.js | backend | ✅ |
+| 0.9 | Middleware: requestId, errorHandler, authenticate | backend | ✅ |
+| 0.10 | Auth: register endpoint | auth | ✅ |
+| 0.11 | Auth: login endpoint | auth | ✅ |
+| 0.12 | Auth: refresh token endpoint | auth | ✅ |
+| 0.13 | Auth: logout endpoint + Redis token blacklist | auth | ✅ |
+| 0.14 | Auth: forgot-password + reset-password | auth | ✅ |
+| 0.15 | Middleware: tenantScope.js + rbac.js | backend | ✅ |
+| 0.16 | Org management endpoints (GET/PATCH /organizations/me) | organizations | ✅ |
+| 0.17 | User invite flow (invite → email → accept) | users | ✅ |
+| 0.18 | User CRUD (list, get, update, deactivate) | users | ✅ |
+| 0.19 | Vite React scaffold (frontend + scan-pwa) | frontend | ✅ |
+| 0.20 | shadcn/ui + Tailwind setup | frontend | ✅ |
+| 0.21 | Axios instance (api.js) + React Query setup | frontend | ✅ |
+| 0.22 | Auth Zustand store | frontend | ✅ |
+| 0.23 | Login page | frontend | ✅ |
+| 0.24 | Register page | frontend | ✅ |
+| 0.25 | Forgot/reset password pages | frontend | ✅ |
+| 0.26 | App layout (sidebar + routing) | frontend | ✅ |
+| 0.27 | User management page | frontend | ✅ |
+| 0.28 | Org settings page | frontend | ✅ |
 
 ---
 
