@@ -133,6 +133,11 @@ export default function App() {
 
   useEffect(() => {
     const initAuth = async () => {
+      const isAuthenticated = localStorage.getItem('isAuthenticated');
+      if (!isAuthenticated) {
+        clearAuth();
+        return;
+      }
       try {
         // Use apiClient (not the api instance) to bypass response interceptors
         // during boot, but still include base configuration (like ngrok headers).

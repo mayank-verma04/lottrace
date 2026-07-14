@@ -52,6 +52,11 @@ function App() {
 
   useEffect(() => {
     const initAuth = async () => {
+      const isAuthenticated = localStorage.getItem('isAuthenticated');
+      if (!isAuthenticated) {
+        clearAuth();
+        return;
+      }
       try {
         const { data } = await apiClient.post('/auth/refresh');
         const { user, accessToken } = data.data;
