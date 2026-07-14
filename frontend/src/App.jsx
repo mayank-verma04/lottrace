@@ -8,7 +8,7 @@ import { AppLayout } from './components/layout/AppLayout';
 import { AuthLayout } from './components/layout/AuthLayout';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { useAuthStore } from './stores/auth.store';
-import axios from 'axios';
+import { apiClient } from './lib/api';
 
 // Auth Pages
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
@@ -53,11 +53,7 @@ function App() {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const { data } = await axios.post(
-          import.meta.env.VITE_API_BASE_URL + '/api/v1/auth/refresh',
-          {},
-          { withCredentials: true }
-        );
+        const { data } = await apiClient.post('/auth/refresh');
         const { user, accessToken } = data.data;
         setAuth(user, accessToken);
       } catch (error) {

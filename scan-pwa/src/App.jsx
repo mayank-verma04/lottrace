@@ -5,8 +5,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { queryClient } from './lib/queryClient';
 import { useAuthStore } from './stores/auth.store';
 import { useEffect } from 'react';
-import { api } from './lib/api';
-import axios from 'axios';
+import { api, apiClient } from './lib/api';
 import ScanPage from '@/pages/ScanPage';
 import LoginPage from '@/pages/auth/LoginPage';
 
@@ -135,13 +134,9 @@ export default function App() {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // Use raw axios (not the api instance) to bypass response interceptors
-        // during boot — this is the same pattern used by the frontend.
-        const { data } = await axios.post(
-          import.meta.env.VITE_API_BASE_URL + '/api/v1/auth/refresh',
-          {},
-          { withCredentials: true }
-        );
+        // Use apiClient (not the api instance) to bypass response interceptors
+        // during boot, but still include base configuration (like ngrok headers).
+        const { data } = await apiClient.post('/auth/refresh');
         const { user, accessToken } = data.data;
         setAuth(user, accessToken);
       } catch {

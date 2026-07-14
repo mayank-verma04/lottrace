@@ -1,10 +1,19 @@
 import axios from 'axios';
 import { useAuthStore } from '../stores/auth.store';
 
-export const api = axios.create({
+const config = {
   baseURL: import.meta.env.VITE_API_BASE_URL + '/api/v1',
   withCredentials: true, // for refresh token cookie
-});
+  headers: {
+    'ngrok-skip-browser-warning': 'true',
+  },
+};
+
+// Base client without interceptors, useful for auth operations (login/refresh)
+export const apiClient = axios.create(config);
+
+// Main client with interceptors
+export const api = axios.create(config);
 
 // Request: inject access token
 api.interceptors.request.use((config) => {
@@ -23,41 +32,51 @@ api.interceptors.response.use(
     const original = error.config;
 
     // Do not intercept 401s for login or refresh itself
-    if (original.url.includes('/auth/login') || original.url.includes('/auth/refresh')) {
+    if (
+      !original ||
+      original.url?.includes('/auth/login') ||
+      original.url?.includes('/auth/refresh')
+    ) {
       return Promise.reject(error);
     }
 
     if (error.response?.status === 401 && !original._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => queue.push({ resolve, reject }))
-          .then((token) => { 
-            original.headers.Authorization = `Bearer ${token}`; 
-            return api(original); 
-          });
+          .then((token) => {
+            original.headers.Authorization = `Bearer ${token}`;
+            return api(original);
+          })
+          .catch(() => Promise.reject(error));
       }
+
       original._retry = true;
       isRefreshing = true;
+
       try {
-        const { data } = await axios.post(
-          import.meta.env.VITE_API_BASE_URL + '/api/v1/auth/refresh',
-          {}, 
-          { withCredentials: true }
-        );
+        const { data } = await apiClient.post('/auth/refresh');
         const newToken = data.data.accessToken;
+        
         useAuthStore.getState().setAccessToken(newToken);
+        
         queue.forEach(({ resolve }) => resolve(newToken));
         queue = [];
+        
         original.headers.Authorization = `Bearer ${newToken}`;
         return api(original);
-      } catch {
-        queue.forEach(({ reject }) => reject());
+      } catch (refreshError) {
+        queue.forEach(({ reject }) => reject(refreshError));
         queue = [];
+        
         useAuthStore.getState().clearAuth();
         window.location.href = '/login';
+        
+        return Promise.reject(error);
       } finally {
         isRefreshing = false;
       }
     }
+
     return Promise.reject(error);
   }
 );
