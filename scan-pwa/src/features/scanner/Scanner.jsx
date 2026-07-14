@@ -41,18 +41,21 @@ export const Scanner = ({ onScan, onError }) => {
       });
     };
 
-    const originalWarn = console.warn;
-    const originalError = console.error;
-
-    console.warn = (...args) => {
-      if (isZxingNoise(args)) return;
-      originalWarn.apply(console, args);
+    const originalConsole = {
+      log: console.log,
+      warn: console.warn,
+      error: console.error,
+      info: console.info,
+      debug: console.debug,
+      trace: console.trace,
     };
 
-    console.error = (...args) => {
-      if (isZxingNoise(args)) return;
-      originalError.apply(console, args);
-    };
+    Object.keys(originalConsole).forEach((method) => {
+      console[method] = (...args) => {
+        if (isZxingNoise(args)) return;
+        originalConsole[method].apply(console, args);
+      };
+    });
 
     const startScanner = async () => {
       try {
@@ -99,9 +102,10 @@ export const Scanner = ({ onScan, onError }) => {
     startScanner();
 
     return () => {
-      // Restore both patched console methods before teardown
-      console.warn = originalWarn;
-      console.error = originalError;
+      // Restore patched console methods before teardown
+      Object.keys(originalConsole).forEach((method) => {
+        console[method] = originalConsole[method];
+      });
       try {
         reader.reset();
       } catch (_) {
