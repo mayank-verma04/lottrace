@@ -24,13 +24,21 @@ export const Scanner = ({ onScan, onError }) => {
     // console.warn AND console.error ("MultiFormatReader: non-ReaderException …").
     // Patch both for the scanner's lifetime to prevent DevTools memory bloat and
     // the resulting browser hang/unresponsiveness.
-    const ZXING_NOISE_PATTERNS = ['NotFoundException', 'non-ReaderException'];
+    const ZXING_NOISE_PATTERNS = ['NotFoundException', 'non-ReaderException', 'ChecksumException', 'FormatException'];
     const isZxingNoise = (args) => {
-      const msg = args[0];
-      return (
-        typeof msg === 'string' &&
-        ZXING_NOISE_PATTERNS.some((p) => msg.includes(p))
-      );
+      return args.some((arg) => {
+        if (typeof arg === 'string') {
+          return ZXING_NOISE_PATTERNS.some((p) => arg.includes(p));
+        }
+        if (arg instanceof Error || (arg && typeof arg === 'object')) {
+          return ZXING_NOISE_PATTERNS.some((p) =>
+            (arg.name && typeof arg.name === 'string' && arg.name.includes(p)) ||
+            (arg.message && typeof arg.message === 'string' && arg.message.includes(p)) ||
+            (arg.toString && typeof arg.toString === 'function' && arg.toString().includes(p))
+          );
+        }
+        return false;
+      });
     };
 
     const originalWarn = console.warn;
@@ -75,7 +83,9 @@ export const Scanner = ({ onScan, onError }) => {
           // ZXing behaviour, not a real error. Only forward genuinely unexpected errors.
           if (err && !(err instanceof NotFoundException)) {
             // Also guard against the string-based name in case the bundler mangles classes
-            if (err.name !== 'NotFoundException' && err.constructor?.name !== 'NotFoundException') {
+            const isIgnorableError = ['NotFoundException', 'ChecksumException', 'FormatException'].includes(err.name) ||
+              ['NotFoundException', 'ChecksumException', 'FormatException'].includes(err.constructor?.name);
+            if (!isIgnorableError) {
               onErrorRef.current?.(err);
             }
           }
