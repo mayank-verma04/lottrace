@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
-import { api } from '@/lib/api';
+import { registerApi } from '@/api/auth.api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
@@ -27,7 +27,7 @@ export default function RegisterPage() {
 
   const onSubmit = async (data) => {
     try {
-      await api.post('/auth/register', data);
+      await registerApi(data);
       toast.success('Registration successful! Please check your email for a verification code.');
       navigate('/verify-email', { state: { email: data.email } });
     } catch (error) {

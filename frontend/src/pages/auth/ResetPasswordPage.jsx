@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { api } from '@/lib/api';
+import { resetPasswordApi } from '@/api/auth.api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
@@ -25,7 +25,7 @@ export default function ResetPasswordPage() {
 
   const onSubmit = async (data) => {
     try {
-      await api.post('/auth/reset-password', { token, newPassword: data.password });
+      await resetPasswordApi({ token, newPassword: data.password });
       toast.success('Password updated successfully. You can now login.');
       navigate('/login');
     } catch (error) {

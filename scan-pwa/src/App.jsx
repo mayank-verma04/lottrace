@@ -5,7 +5,8 @@ import { Toaster } from '@/components/ui/sonner';
 import { queryClient } from './lib/queryClient';
 import { useAuthStore } from './stores/auth.store';
 import { useEffect } from 'react';
-import { api, apiClient } from './lib/api';
+import { apiClient } from './lib/api';
+import { logoutApi } from './api/auth.api';
 import ScanPage from '@/pages/ScanPage';
 import LoginPage from '@/pages/auth/LoginPage';
 
@@ -50,11 +51,12 @@ function AppHeader() {
 
   const handleLogout = async () => {
     try {
-      await api.post('/auth/logout');
+      await logoutApi();
     } catch {
-      // ignore
+      // ignore — clear local state regardless
     } finally {
       clearAuth();
+      queryClient.clear();
     }
   };
 

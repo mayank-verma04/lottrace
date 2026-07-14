@@ -55,9 +55,9 @@ api.interceptors.response.use(
 
       try {
         const { data } = await apiClient.post('/auth/refresh');
-        const newToken = data.data.accessToken;
+        const { user, accessToken: newToken } = data.data;
         
-        useAuthStore.getState().setAccessToken(newToken);
+        useAuthStore.getState().setAuth(user, newToken);
         
         queue.forEach(({ resolve }) => resolve(newToken));
         queue = [];

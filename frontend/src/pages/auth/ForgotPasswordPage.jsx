@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link } from 'react-router-dom';
-import { api } from '@/lib/api';
+import { forgotPasswordApi } from '@/api/auth.api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
@@ -21,7 +21,7 @@ export default function ForgotPasswordPage() {
 
   const onSubmit = async (data) => {
     try {
-      await api.post('/auth/forgot-password', data);
+      await forgotPasswordApi(data);
       toast.success('Reset link sent to your email.');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to send reset link');

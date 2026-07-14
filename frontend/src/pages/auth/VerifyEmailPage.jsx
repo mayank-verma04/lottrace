@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { api } from '@/lib/api';
+import { verifyEmailApi, resendVerificationApi } from '@/api/auth.api';
 import { useAuthStore } from '@/stores/auth.store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -98,7 +98,7 @@ export default function VerifyEmailPage() {
     setIsVerifying(true);
 
     try {
-      const response = await api.post('/auth/verify-email', { email, otp: code });
+      const response = await verifyEmailApi({ email, otp: code });
       const { user, accessToken } = response.data.data;
       setVerified(true);
 
@@ -130,7 +130,7 @@ export default function VerifyEmailPage() {
     setIsResending(true);
 
     try {
-      await api.post('/auth/resend-verification', { email });
+      await resendVerificationApi({ email });
       toast.success('New verification code sent to your email');
       setResendCooldown(60);
       setOtp(Array(OTP_LENGTH).fill(''));

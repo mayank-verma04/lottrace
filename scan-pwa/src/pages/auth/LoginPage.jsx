@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useNavigate } from 'react-router-dom';
-import { api } from '@/lib/api';
+import { useNavigate, Navigate } from 'react-router-dom';
+import { loginApi } from '@/api/auth.api';
 import { useAuthStore } from '@/stores/auth.store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,7 @@ const loginSchema = z.object({
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { user, accessToken, isLoading } = useAuthStore();
   const setAuth = useAuthStore((state) => state.setAuth);
   const [unverifiedEmail, setUnverifiedEmail] = useState(null);
   const [isResending, setIsResending] = useState(false);
@@ -31,10 +32,15 @@ export default function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm({ resolver: zodResolver(loginSchema) });
 
+  // Redirect authenticated users away from login
+  if (!isLoading && user && accessToken) {
+    return <Navigate to="/scan" replace />;
+  }
+
   const onSubmit = async (data) => {
     setUnverifiedEmail(null);
     try {
-      const response = await api.post('/auth/login', data);
+      const response = await loginApi(data);
       const { user, accessToken } = response.data.data;
       setAuth(user, accessToken);
       navigate('/scan');
@@ -52,7 +58,9 @@ export default function LoginPage() {
     if (isResending || !unverifiedEmail) return;
     setIsResending(true);
     try {
-      await api.post('/auth/resend-verification', { email: unverifiedEmail });
+      // Use apiClient directly since we don't have resend in scan-pwa auth.api
+      const { apiClient } = await import('@/lib/api');
+      await apiClient.post('/auth/resend-verification', { email: unverifiedEmail });
       toast.success('Verification email sent! Check your inbox.');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to resend verification email.');

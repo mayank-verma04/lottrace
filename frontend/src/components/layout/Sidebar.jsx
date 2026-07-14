@@ -1,13 +1,13 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Package, PlusCircle, GitBranch,
   MapPin, Box, Upload, FileText, AlertTriangle, Shield, Settings, LogOut, Activity
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePermissions } from '@/hooks/usePermissions';
-import { api } from '@/lib/api';
+import { logoutApi } from '@/api/auth.api';
 import { useAuthStore } from '@/stores/auth.store';
-import { useNavigate } from 'react-router-dom';
+import { queryClient } from '@/lib/queryClient';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, permission: '*' },
@@ -32,11 +32,12 @@ export const Sidebar = () => {
 
   const handleLogout = async () => {
     try {
-      await api.post('/auth/logout');
+      await logoutApi();
     } catch (e) {
-      // ignore error
+      // ignore error — clear local state regardless
     } finally {
       clearAuth();
+      queryClient.clear();
       navigate('/login');
     }
   };

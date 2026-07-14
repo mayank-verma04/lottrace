@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { api } from '@/lib/api';
+import { loginApi, resendVerificationApi } from '@/api/auth.api';
 import { useAuthStore } from '@/stores/auth.store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,14 +23,14 @@ export default function LoginPage() {
   const [unverifiedEmail, setUnverifiedEmail] = useState(null);
   const [isResending, setIsResending] = useState(false);
   
-  const { register, handleSubmit, formState: { errors, isSubmitting }, getValues } = useForm({
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(loginSchema)
   });
 
   const onSubmit = async (data) => {
     setUnverifiedEmail(null);
     try {
-      const response = await api.post('/auth/login', data);
+      const response = await loginApi(data);
       const { user, accessToken } = response.data.data;
       setAuth(user, accessToken);
       navigate('/dashboard');
@@ -49,7 +49,7 @@ export default function LoginPage() {
     setIsResending(true);
 
     try {
-      await api.post('/auth/resend-verification', { email: unverifiedEmail });
+      await resendVerificationApi({ email: unverifiedEmail });
       toast.success('Verification code sent! Redirecting...');
       setTimeout(() => {
         navigate('/verify-email', { state: { email: unverifiedEmail } });
@@ -99,11 +99,11 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <FormField label="Email" error={errors.email?.message}>
-            <Input {...register('email')} type="email" placeholder="name@company.com" />
+            <Input {...register('email')} type="email" placeholder="name@company.com" autoComplete="email" />
           </FormField>
           
           <FormField label="Password" error={errors.password?.message}>
-            <Input {...register('password')} type="password" />
+            <Input {...register('password')} type="password" autoComplete="current-password" />
           </FormField>
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>
@@ -111,9 +111,12 @@ export default function LoginPage() {
             Sign In
           </Button>
 
-          <div className="text-center text-sm">
+          <div className="flex items-center justify-between text-sm">
             <Link to="/forgot-password" className="text-brand-600 hover:underline">
               Forgot your password?
+            </Link>
+            <Link to="/register" className="text-brand-600 hover:underline">
+              Create account
             </Link>
           </div>
         </form>

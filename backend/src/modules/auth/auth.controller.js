@@ -43,7 +43,7 @@ const resendVerification = async (req, res) => {
 const refresh = async (req, res) => {
   const refreshToken = req.cookies?.refreshToken;
   if (!refreshToken) {
-    return apiResponse.unauthorized(res, 'INVALID_TOKEN', 'Refresh token required');
+    return apiResponse.unauthorized(res, 'AUTH_INVALID_REFRESH', 'Refresh token required');
   }
   const result = await authService.refresh({ refreshToken });
   setRefreshTokenCookie(res, result.refreshToken);

@@ -6,7 +6,7 @@ const redis = require('../config/redis');
 const authenticate = async (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return apiResponse.unauthorized(res, 'Missing or invalid authorization header');
+    return apiResponse.unauthorized(res, 'AUTH_REQUIRED', 'Missing or invalid authorization header');
   }
 
   const token = authHeader.split(' ')[1];
@@ -14,7 +14,7 @@ const authenticate = async (req, res, next) => {
   try {
     const isBlacklisted = await redis.get(`bl_${token}`);
     if (isBlacklisted) {
-      return apiResponse.unauthorized(res, 'Token has been revoked');
+      return apiResponse.unauthorized(res, 'AUTH_SESSION_REVOKED', 'Token has been revoked');
     }
 
     const decoded = jwt.verify(token, env.ACCESS_JWT_SECRET);
@@ -25,7 +25,7 @@ const authenticate = async (req, res, next) => {
     };
     next();
   } catch (err) {
-    return apiResponse.unauthorized(res, 'Token is invalid or expired');
+    return apiResponse.unauthorized(res, 'AUTH_TOKEN_EXPIRED', 'Token is invalid or expired');
   }
 };
 

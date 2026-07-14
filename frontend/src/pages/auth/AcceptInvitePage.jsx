@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { api } from '@/lib/api';
+import { acceptInviteApi } from '@/api/auth.api';
 import { useAuthStore } from '@/stores/auth.store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,7 +27,7 @@ export default function AcceptInvitePage() {
 
   const onSubmit = async (data) => {
     try {
-      const response = await api.post('/auth/accept-invite', {
+      const response = await acceptInviteApi({
         token,
         email,
         password: data.password,
