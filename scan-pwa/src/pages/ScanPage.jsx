@@ -46,9 +46,13 @@ export default function ScanPage() {
   };
 
   const handleScan = async (code) => {
+    if (!code || !code.trim()) return;
+    
     if (navigator.vibrate) navigator.vibrate(50);
     const parsed = parseGS1(code);
     const lotCode = parsed.lotCode || parsed.raw;
+
+    if (!lotCode || !lotCode.trim()) return;
 
     if (isBulkMode) {
       // Deduplicate

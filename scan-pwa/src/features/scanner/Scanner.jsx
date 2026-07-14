@@ -69,7 +69,9 @@ export const Scanner = ({ onScan, onError }) => {
 
         reader.decodeFromVideoDevice(null, videoRef.current, (result, err) => {
           if (result) {
-            const code = result.getText();
+            const code = result.getText()?.trim();
+            if (!code) return; // Prevent empty scan triggers
+
             const now = Date.now();
             // De-duplicate: ignore same code scanned within 2 s
             if (
